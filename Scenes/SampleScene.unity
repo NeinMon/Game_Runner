@@ -209,8 +209,8 @@ MonoBehaviour:
   bricksObj: {fileID: 7192267006283269454, guid: c9d57ebf463a7bd4fad25319c4e894fb, type: 3}
   obstacleObj: {fileID: 5912314069480421316, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
   coinObj: {fileID: 5967977674504712106, guid: 11846d8296ba95041b2fef98ce18fe10, type: 3}
-  speedUpObj: {fileID: 9115134637221776493, guid: 7b0107b24cd87434dbc46da3b288ba54, type: 3}
-  slowDownObj: {fileID: 2030192677385663945, guid: d9af377a364b6c743baa3ee12689dc8e, type: 3}
+  speedUpObj: {fileID: 913190864686773551, guid: 91e6ad56657220b46be366338997fbd2, type: 3}
+  slowDownObj: {fileID: 7950851135009255796, guid: 40023e010edf9924394e306901a6602e, type: 3}
   powerUpFrequency: 5
   powerUpSpawnChance: 0.5
 --- !u!4 &78070007
