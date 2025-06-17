@@ -1,15 +1,13 @@
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
 public class Player_Controller : MonoBehaviour
 {
     [Header("Movement Settings")]
-    [SerializeField] private float forwardSpeed = 1f;
-    [SerializeField] private float laneDistance = 1f;
-    [SerializeField] private float sideSpeed = 2f;
+    [SerializeField] private float forwardSpeed = 10f;
+    [SerializeField] private float laneDistance = 3f;
+    [SerializeField] private float sideSpeed = 15f;
     private int targetLane = 1; // 0 = Left, 1 = Mid, 2 = Right
     private CharacterController controller;
     [Header("Animation")]
@@ -17,55 +15,20 @@ public class Player_Controller : MonoBehaviour
     private Queue<int> laneChangeQueue = new Queue<int>();
     private bool isChangingLane = false;
     private bool isJumping = false;
-    [SerializeField] private float jumpForce = 2.2f; // Lực nhảy
-    [SerializeField] private float gravity = -5f; // Trọng lực, có thể chỉnh trong Inspector
-    [SerializeField] private GameObject restartPanel;
-    [SerializeField] private GameObject playPanel;
-    private bool isGameStarted = false;
-    private int score = 0;
-    private float originalSpeed;
-    [SerializeField] private float fastDuration = 3f; // Thời gian chạy nhanh (giây)
-    [SerializeField] private float slowDuration = 3f; // Thời gian chạy chậm (giây)
-    [SerializeField] private float fastMultiplier = 2f;
-    [SerializeField] private float slowMultiplier = 0.5f;
-    [SerializeField] private TMP_Text scoreText;
-    [SerializeField] private float minForwardSpeed = 1f;
-    [SerializeField] private float maxForwardSpeed = 4f;
-    [SerializeField] private float speedIncreaseRate = 0.05f;
-    private float baseSpeed;
-    private float speedMultiplier = 1f;
+    [SerializeField] private float jumpForce = 7f; // Lực nhảy
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
-        baseSpeed = minForwardSpeed;
-        forwardSpeed = minForwardSpeed;
-        originalSpeed = minForwardSpeed;
-        if (restartPanel != null)
-            restartPanel.SetActive(false); // Ẩn panel khi bắt đầu game
-        if (playPanel != null)
-            playPanel.SetActive(true); // Hiện panel PLAY khi vào game
-        isGameStarted = false;
-        // Đảm bảo animation idle được kích hoạt khi bắt đầu game
+        // Đảm bảo animation run được kích hoạt khi bắt đầu game
         if (player_Animation != null)
         {
-            player_Animation.SetFloat("is_running", 0.0f); // Set trạng thái idle
+            player_Animation.SetFloat("is_running", 1.0f);
         }
-        if (scoreText != null)
-            scoreText.text = "Score: 0";
     }
 
     void Update()
     {
-        if (!isGameStarted) return;
-        // Tăng baseSpeed dần đều
-        if (baseSpeed < maxForwardSpeed)
-        {
-            baseSpeed += speedIncreaseRate * Time.deltaTime;
-            if (baseSpeed > maxForwardSpeed)
-                baseSpeed = maxForwardSpeed;
-        }
-        forwardSpeed = baseSpeed * speedMultiplier;
         HandleForwardMovement();
         HandleLaneSwitching();
         MoveTowardsTargetLane();
@@ -171,7 +134,7 @@ public class Player_Controller : MonoBehaviour
     {
         float startY = transform.position.y;
         float velocity = jumpForce;
-        // Sử dụng gravity từ biến thay vì gán cứng
+        float gravity = -20f;
         while (velocity > 0 || transform.position.y > startY)
         {
             float deltaY = velocity * Time.deltaTime;
@@ -184,71 +147,5 @@ public class Player_Controller : MonoBehaviour
         pos.y = startY;
         transform.position = pos;
         isJumping = false;
-    }
-
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        if (hit.gameObject.CompareTag("Car"))
-        {
-            Vector3 normal = hit.normal.normalized;
-            // Chỉ xử lý nếu va chạm theo trục X hoặc Z (không phải từ trên xuống)
-            if (Mathf.Abs(normal.y) < 0.7f)
-            {
-                if (restartPanel != null)
-                    restartPanel.SetActive(true);
-                if (player_Animation != null)
-                    player_Animation.SetFloat("is_running", 0.0f); // Chuyển về idle
-                isGameStarted = false; // Dừng toàn bộ gameplay
-                // Dừng game nếu muốn: Time.timeScale = 0;
-            }
-            // Nếu va chạm từ trên xuống (Y), không làm gì cả
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Coin"))
-        {
-            score++;
-            Destroy(other.gameObject);
-            if (scoreText != null)
-                scoreText.text = "Score: " + score;
-            // TODO: cập nhật UI điểm số nếu có
-        }
-        else if (other.CompareTag("Thunder"))
-        {
-            StartCoroutine(SpeedBoost());
-            Destroy(other.gameObject);
-        }
-        else if (other.CompareTag("Time"))
-        {
-            StartCoroutine(SpeedSlow());
-            Destroy(other.gameObject);
-        }
-    }
-
-    private System.Collections.IEnumerator SpeedBoost()
-    {
-        speedMultiplier = fastMultiplier;
-        yield return new WaitForSeconds(fastDuration);
-        speedMultiplier = 1f;
-    }
-
-    private System.Collections.IEnumerator SpeedSlow()
-    {
-        speedMultiplier = slowMultiplier;
-        yield return new WaitForSeconds(slowDuration);
-        speedMultiplier = 1f;
-    }
-
-    public void PlayGame()
-    {
-        isGameStarted = true;
-        if (playPanel != null)
-            playPanel.SetActive(false);
-        if (player_Animation != null)
-        {
-            player_Animation.SetFloat("is_running", 1.0f); // Set trạng thái chạy khi bắt đầu game
-        }
     }
 }
