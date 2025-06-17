@@ -17,7 +17,8 @@ public class Mapgameflow : MonoBehaviour
     private Vector3 nextPowerUpSpawn;
     
     private int tileCounter = 0; // Counter to track tiles spawned
-    public int powerUpFrequency = 3; // Spawn power-up every X tiles
+    public int powerUpFrequency = 6; // Increased from 3 to 6 - spawn every 6 tiles
+    public float powerUpSpawnChance = 0.5f; // 50% chance to spawn even when counter matches
 
     void Start()
     {
@@ -72,12 +73,6 @@ public class Mapgameflow : MonoBehaviour
         nextCoinSpawn.y = 0.2f; // Height for coins
         nextCoinSpawn.z += 1.0f; // Start position for coins
 
-        // Setup power-up position - randomly choose a lane that doesn't have coins
-        nextPowerUpSpawn = nextTileSpawn;
-        nextPowerUpSpawn.x = Random.value < 0.5f ? brickLane : obstacleLane; // Choose between brick lane and obstacle lane
-        nextPowerUpSpawn.y = 0.2f;
-        nextPowerUpSpawn.z += 2.5f; // Position after obstacles to avoid direct overlap
-
         // Instantiate tiles without destruction
         GameObject tile1 = Instantiate(tileObj, nextTileSpawn, tileObj.rotation).gameObject;
 
@@ -90,6 +85,9 @@ public class Mapgameflow : MonoBehaviour
             GameObject obstacle = Instantiate(obstacleObj, nextObstacleSpawn, obstacleObj.rotation).gameObject;
         }
 
+        // Calculate the end position of coin sequence
+        float coinEndZ = nextCoinSpawn.z + (5 * 0.7f);
+        
         // Instantiate 5 coins in succession
         if (coinObj != null)
         {
@@ -101,8 +99,14 @@ public class Mapgameflow : MonoBehaviour
             }
         }
 
+        // Setup power-up position AFTER the coin sequence
+        nextPowerUpSpawn = nextCoinSpawn;
+        nextPowerUpSpawn.z = coinEndZ + 0.3f; // Position after the last coin
+        nextPowerUpSpawn.x = coinLane; // Use the same lane as coins
+
         // Check if it's time to spawn a power-up (every powerUpFrequency tiles)
-        if (tileCounter % powerUpFrequency == 0)
+        // AND apply an additional probability check
+        if (tileCounter % powerUpFrequency == 0 && Random.value < powerUpSpawnChance)
         {
             // Random choice between speed-up (70%) and slow-down (30%)
             if (Random.value < 0.7f && speedUpObj != null)
