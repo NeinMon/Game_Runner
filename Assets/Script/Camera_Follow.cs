@@ -11,7 +11,7 @@ public class Camera_Follow : MonoBehaviour
     
     // Offset sẽ được tính toán tự động dựa vào vị trí ban đầu
     private Vector3 offset;
-      private void FixedUpdate()
+      private void LateUpdate()
     {
         if (target == null)
         {
@@ -19,11 +19,11 @@ public class Camera_Follow : MonoBehaviour
             return;
         }
         
-        // Tính toán vị trí mới dựa trên vị trí của target và offset đã tính toán
+        // Camera chỉ follow trục Z của nhân vật, giữ nguyên X và Y ban đầu
         Vector3 desiredPosition = new Vector3(
-            initialPosition.x, // Giữ nguyên tọa độ X ban đầu
-            target.position.y + offset.y, // Cập nhật Y theo target
-            target.position.z + offset.z  // Cập nhật Z theo target
+            initialPosition.x, // Giữ nguyên X
+            initialPosition.y, // Giữ nguyên Y
+            target.position.z + offset.z // Chỉ cập nhật Z
         );
         
         // Smoothly di chuyển camera đến vị trí mong muốn
