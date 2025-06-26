@@ -1,16 +1,28 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+
+    public Button map1Button;
+
+    public void Start()
     {
-        
+        map1Button.onClick.AddListener(RenderMap1);
+    }
+    public void Open()
+    {
+        gameObject.SetActive(true);
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Close()
     {
-        
+        gameObject.SetActive(false);
+    }
+
+    public void RenderMap1()
+    {
+        SceneManager.LoadScene("SampleScene");
     }
 }

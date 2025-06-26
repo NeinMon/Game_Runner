@@ -10,8 +10,8 @@ public class SettingManager : MonoBehaviour
     public TMP_InputField displayNameInput;
 
     [Header("Buttons")]
-    public GameObject signInOrUpButton;
-    public GameObject signOutButton;
+    public Button signInOrUpButton;
+    public Button signOutButton;
 
     [Header("Text")]
     public Text displayNameText;
@@ -20,11 +20,18 @@ public class SettingManager : MonoBehaviour
     public UserManager userManager;
 
 
+    public void Start()
+    {
+        signInOrUpButton.onClick.AddListener(HandleLoginOrRegister);
+        signOutButton.onClick.AddListener(HandleLogout);
+        SetInputsAndButton();
+        SetDisplayName();
+    }
+
+
     public void Open()
     {
         gameObject.SetActive(true);
-        SetInputsAndButton();
-        SetDisplayName();
     }
 
     public void Close()
@@ -36,41 +43,18 @@ public class SettingManager : MonoBehaviour
     {
         userManager.LoginOrRegister(emailInput.text, passwordInput.text, displayNameInput.text, (user) =>
         {
-            Debug.Log("✅ Đăng nhập/đăng ký hoàn tất");
             SetInputsAndButton();
+            SetDisplayName();
         });
     }
 
-    public void SetInputsAndButton()
-    {
-        bool isSignedIn = userManager.IsSignedIn();
 
-        emailInput.interactable = !isSignedIn;
-        passwordInput.interactable = !isSignedIn;
-        displayNameInput.interactable = !isSignedIn;
-
-        if (signInOrUpButton != null) signInOrUpButton.SetActive(!isSignedIn);
-        if (signOutButton != null) signOutButton.SetActive(isSignedIn);
-
-        if (isSignedIn)
-        {
-            var user = userManager.GetUser();
-            displayNameInput.text = user?.DisplayName ?? "";
-            emailInput.text = user?.Email ?? "";
-            passwordInput.text = "********";
-        }
-        else
-        {
-            emailInput.text = "";
-            passwordInput.text = "";
-            displayNameInput.text = "";
-        }
-    }
 
     public void HandleLogout()
     {
         userManager.Logout();
         SetInputsAndButton();
+        SetDisplayName();
     }
 
     public void SetDisplayName()
@@ -85,5 +69,17 @@ public class SettingManager : MonoBehaviour
             displayNameText.text = "<ANONYMOUS>";
         }
     }
+    public void SetInputsAndButton()
+    {
+        bool isSignedIn = userManager.IsSignedIn();
+        emailInput.text = "";
+        passwordInput.text = "";
+        displayNameInput.text = "";
+        emailInput.gameObject.SetActive(!isSignedIn);
+        passwordInput.gameObject.SetActive(!isSignedIn);
+        displayNameInput.gameObject.SetActive(!isSignedIn);
 
+        if (signInOrUpButton != null) signInOrUpButton.gameObject.SetActive(!isSignedIn);
+        if (signOutButton != null) signOutButton.gameObject.SetActive(isSignedIn);
+    }
 }

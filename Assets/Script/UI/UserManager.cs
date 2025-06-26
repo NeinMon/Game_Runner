@@ -37,12 +37,11 @@ public class UserManager : MonoBehaviour
                 var user = task.Result.User;
                 Debug.Log("✅ Đăng nhập: " + user.Email);
 
-                if (string.IsNullOrEmpty(user.DisplayName))
-                {
-                    user.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName });
-                }
-
-                onSuccess?.Invoke(user);
+                user.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName })
+                    .ContinueWithOnMainThread(_ =>
+                    {
+                        onSuccess?.Invoke(user);
+                    });
                 return;
             }
 
@@ -54,9 +53,11 @@ public class UserManager : MonoBehaviour
                     var newUser = registerTask.Result.User;
                     Debug.Log("✅ Đăng ký: " + newUser.Email);
 
-                    newUser.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName });
-
-                    onSuccess?.Invoke(newUser);
+                    newUser.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName })
+                        .ContinueWithOnMainThread(_ =>
+                        {
+                            onSuccess?.Invoke(newUser);
+                        });
                 }
                 else
                 {
@@ -65,6 +66,7 @@ public class UserManager : MonoBehaviour
             });
         });
     }
+
 
     public void Logout()
     {
