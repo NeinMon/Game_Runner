@@ -28,7 +28,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float slowDuration = 3f; // Thời gian chạy chậm (giây)
     [SerializeField] private float fastMultiplier = 2f;
     [SerializeField] private float slowMultiplier = 0.5f;
-    [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private Text scoreText;
     [SerializeField] private float minForwardSpeed = 1f;
     [SerializeField] private float maxForwardSpeed = 4f;
     [SerializeField] private float speedIncreaseRate = 0.05f;
