@@ -3,14 +3,20 @@ using Firebase;
 using Firebase.Auth;
 using Firebase.Extensions;
 using System;
+using Firebase.Database;
+using System.Collections.Generic;
 
 public class UserManager : MonoBehaviour
 {
     private FirebaseAuth auth;
+    private DatabaseReference dbRef;
+
 
     void Start()
     {
         auth = FirebaseAuth.DefaultInstance;
+        dbRef = FirebaseDatabase.DefaultInstance.RootReference;
+
 
         FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
         {
@@ -86,4 +92,38 @@ public class UserManager : MonoBehaviour
     {
         return auth != null && auth.CurrentUser != null;
     }
+
+    public void SaveScore(int score, long completeTime, String mapName)
+    {
+        if (!IsSignedIn()) return;
+
+        FirebaseUser user = GetUser();
+        string uid = user.UserId;
+        string name = user.DisplayName ?? user.Email;
+
+        Dictionary<string, object> entry = new Dictionary<string, object>
+        {
+            { "score", score },
+            { "complete_time", completeTime },
+            { "display_name", name }
+        };
+
+        dbRef.Child("leaderboard")
+        .Child(mapName)
+             .Child(uid)
+             .SetValueAsync(entry)
+             .ContinueWithOnMainThread(task =>
+             {
+                 if (task.IsCompletedSuccessfully)
+                     Debug.Log("✅ Ghi điểm thành công!");
+                 else
+                     Debug.LogError("❌ Ghi điểm thất bại: " + task.Exception?.Message);
+             });
+    }
+
+
+    // public ScoreData GetScore(String mapName)
+    // {
+        
+    // }
 }
