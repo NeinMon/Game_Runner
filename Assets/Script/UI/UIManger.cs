@@ -33,6 +33,6 @@ public class MainMenuUIManager : MonoBehaviour
 
     void OnOpenMaps()
     {
-        leaderboardManager.Open();
+        mapsManager.Open();
     }
 }
