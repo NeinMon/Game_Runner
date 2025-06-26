@@ -5,33 +5,34 @@ using UnityEngine.UI;
 public class MainMenuUIManager : MonoBehaviour
 {
     [Header("UI Buttons")]
-    public Button startButton;
-    public Button leaderboardButton;
     public Button settingsButton;
+    public Button leaderboardButton;
+    public Button mapsButton;
 
-    [Header("Panels")]
-    public GameObject leaderboardPanel;
-    public GameObject settingsPopup;
+    [Header("Managers")]
+    public SettingManager settingManager;
+    public LeaderboardManager leaderboardManager;
+    public MapsManager mapsManager;
 
-    private void Start()
+    void Start()
     {
-        startButton.onClick.AddListener(OnStartButtonClick);
-        leaderboardButton.onClick.AddListener(OnLeaderboardButtonClick);
-        settingsButton.onClick.AddListener(OnSettingsButtonClick);
+        settingsButton.onClick.AddListener(OnOpenSettings);
+        leaderboardButton.onClick.AddListener(OnOpenLeaderboard);
+        mapsButton.onClick.AddListener(OnOpenMaps);
     }
 
-    void OnStartButtonClick()
+    void OnOpenSettings()
     {
-        SceneManager.LoadScene("SampleScene");
+        settingManager.Open();
     }
 
-    void OnLeaderboardButtonClick()
+    void OnOpenLeaderboard()
     {
-        leaderboardPanel.SetActive(true);
+        leaderboardManager.Open();
     }
 
-    void OnSettingsButtonClick()
+    void OnOpenMaps()
     {
-        settingsPopup.SetActive(true);
+        leaderboardManager.Open();
     }
 }
