@@ -62,7 +62,8 @@ public class SettingManager : MonoBehaviour
         var user = userManager.GetUser();
         if (user != null)
         {
-            displayNameText.text = user.DisplayName ?? user.Email;
+            displayNameText.text = user.DisplayName ?? "<ANONYMOUS>";
+            Debug.Log("DISPLAY NAME OF THIS GUY: " + user.DisplayName);
         }
         else
         {

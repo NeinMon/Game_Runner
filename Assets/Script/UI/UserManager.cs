@@ -43,11 +43,14 @@ public class UserManager : MonoBehaviour
                 var user = task.Result.User;
                 Debug.Log("✅ Đăng nhập: " + user.Email);
 
-                user.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName })
+                if (!string.IsNullOrEmpty(displayName))
+                {
+                    user.UpdateUserProfileAsync(new UserProfile { DisplayName = displayName })
                     .ContinueWithOnMainThread(_ =>
                     {
                         onSuccess?.Invoke(user);
                     });
+                }
                 return;
             }
 

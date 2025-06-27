@@ -3080,11 +3080,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6431829870934652666, guid: 365814b1724a74b498c71ab310c6bebe, type: 3}
   m_PrefabInstance: {fileID: 1502855051}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &551471624 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5800316722216462725, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
-  m_PrefabInstance: {fileID: 1005136557}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &603676836
 GameObject:
   m_ObjectHideFlags: 0
@@ -5666,7 +5661,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2108871174975432634, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4602239279924441971, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -517
       objectReference: {fileID: 0}
     - target: {fileID: 4612092612313699675, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
       propertyPath: m_Name
@@ -5690,7 +5689,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5800316722216462725, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7058642936631207749, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
       propertyPath: m_Name
@@ -6712,6 +6711,11 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.06501055, y: -0.34190774, z: -0.027625905}
     m_Extent: {x: 0.049464166, y: 0.23018837, z: 0.06308049}
   m_DirtyAABB: 0
+--- !u!1 &1117000122 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2108871174975432634, guid: bfa136fd867f1cc41b88c803b56908bf, type: 3}
+  m_PrefabInstance: {fileID: 1005136557}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1141898857
 GameObject:
   m_ObjectHideFlags: 0
@@ -12535,7 +12539,7 @@ MonoBehaviour:
   jumpForce: 2.1
   gravity: -5
   restartPanel: {fileID: 269831995}
-  playPanel: {fileID: 551471624}
+  playPanel: {fileID: 1117000122}
   fastDuration: 3
   slowDuration: 3
   fastMultiplier: 2
