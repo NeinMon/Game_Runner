@@ -18,157 +18,75 @@ public class Mapgameflow : MonoBehaviour
     public Transform freezeCircleObj; // Freeze circle power-up
     private Vector3 nextPowerUpSpawn;
     
-    private int tileCounter; // Counter to track tiles spawned
+    private int tileCounter = 0; // Counter to track tiles spawned
     public int powerUpFrequency = 3; // Spawn power-up every X tiles
     
     // Difficulty progression variables
     [Header("Difficulty Settings")]
-    public float initialSpawnDelay = 1.0f; // Initial spawn delay
-    public float minimumSpawnDelay = 0.3f; // Minimum spawn delay (max difficulty)
-    public float difficultyIncreaseRate = 0.02f; // How much to decrease delay per tile
-    public int difficultyIncreaseInterval = 5; // Every X tiles, increase difficulty
+    public float spawnRateIncreaseInterval = 30f; // Increase difficulty every 30 seconds
+    public float minSpawnDelay = 0.3f; // Minimum delay between tile spawns
+    public float spawnDelayDecrease = 0.05f; // How much to decrease spawn delay
     
-    [Header("Obstacle Frequency")]
+    [Header("Obstacle Density")]
     public float baseObstacleChance = 0.8f; // Base chance to spawn obstacles
-    public float maxObstacleChance = 1.0f; // Maximum obstacle chance
-    public float obstacleChanceIncrease = 0.05f; // Increase per difficulty level
+    public float maxObstacleChance = 0.95f; // Maximum obstacle spawn chance
+    public float obstacleChanceIncrease = 0.02f; // How much to increase per difficulty level
     
-    [Header("Power-up Frequency")]
-    public int basePowerUpFrequency = 3; // Base power-up frequency
-    public int maxPowerUpFrequency = 7; // Maximum power-up frequency (less frequent)
+    [Header("Power-up Adjustments")]
+    public float basePowerUpChance = 0.6f; // Base chance for power-ups to spawn
+    public float minPowerUpChance = 0.3f; // Minimum power-up spawn chance
+    public float powerUpChanceDecrease = 0.03f; // Decrease power-up chance as game gets harder
     
-    [Header("Special Obstacles")]
+    [Header("Freeze Circle Progression")]
     public float baseFreezeChance = 0.2f; // Base freeze circle chance
-    public float maxFreezeChance = 0.5f; // Maximum freeze circle chance
-    public float freezeChanceIncrease = 0.05f; // Increase per difficulty level
+    public float maxFreezeChance = 0.4f; // Maximum freeze circle chance
+    public float freezeChanceIncrease = 0.01f; // Increase freeze circle chance
     
-    // Current difficulty tracking
-    private float currentSpawnDelay;
+    [Header("Coin Arc Progression")]
+    public float baseArcRate = 0.3f; // Base chance for arc coins
+    public float maxArcRate = 0.6f; // Maximum arc rate
+    public float arcRateIncrease = 0.02f; // Increase arc rate with difficulty
+    
+    // Runtime variables
+    private float currentSpawnDelay = 1f;
     private float currentObstacleChance;
-    private int currentPowerUpFrequency;
+    private float currentPowerUpChance;
     private float currentFreezeChance;
-    private int difficultyLevel;
-    
-    // Level system integration
-    [Header("Level Integration")]
-    public Transform coinMultiplierPowerUp; // x2 coin power-up object
-    public int multiplierPowerUpFrequency = 15; // Spawn every X tiles
-    private bool isGamePaused;
+    private float currentArcRate;
+    private int difficultyLevel = 0;
 
     void Start()
     {
         nextTileSpawn.z = 18;
-        InitializeDifficulty();
-        StartCoroutine(SpawnTile());
-    }
-    
-    public void PauseGame()
-    {
-        isGamePaused = true;
-        Debug.Log("Game paused!");
-    }
-    
-    public void ResumeGame()
-    {
-        isGamePaused = false;
-        Debug.Log("Game resumed!");
-    }
-    
-    public void ResetForNewLevel()
-    {
-        // Reset difficulty and counters for new level
-        difficultyLevel = 0;
-        tileCounter = 0;
-        isGamePaused = false;
         
-        // Clear existing objects (optional - depends on your game design)
-        ClearExistingObjects();
-        
-        // Reinitialize difficulty
-        InitializeDifficulty();
-        
-        // Reset spawn position
-        nextTileSpawn.z = 18;
-        
-        // Restart spawning
-        StartCoroutine(SpawnTile());
-        
-        Debug.Log("Map reset for new level!");
-    }
-    
-    void ClearExistingObjects()
-    {
-        // Clear coins
-        GameObject[] coins = GameObject.FindGameObjectsWithTag("Coin");
-        foreach (GameObject coin in coins)
-        {
-            Destroy(coin);
-        }
-        
-        // Clear obstacles
-        GameObject[] obstacles = GameObject.FindGameObjectsWithTag("Obstacle");
-        foreach (GameObject obstacle in obstacles)
-        {
-            Destroy(obstacle);
-        }
-        
-        // Clear power-ups
-        GameObject[] powerUps = GameObject.FindGameObjectsWithTag("PowerUp");
-        foreach (GameObject powerUp in powerUps)
-        {
-            Destroy(powerUp);
-        }
-    }
-    
-    void InitializeDifficulty()
-    {
-        currentSpawnDelay = initialSpawnDelay;
+        // Initialize difficulty values
+        currentSpawnDelay = 1f;
         currentObstacleChance = baseObstacleChance;
-        currentPowerUpFrequency = basePowerUpFrequency;
+        currentPowerUpChance = basePowerUpChance;
         currentFreezeChance = baseFreezeChance;
-        powerUpFrequency = currentPowerUpFrequency;
-    }
-    
-    void UpdateDifficulty()
-    {
-        // Increase difficulty every difficultyIncreaseInterval tiles
-        if (tileCounter % difficultyIncreaseInterval == 0)
-        {
-            difficultyLevel++;
-            
-            // Decrease spawn delay (increase speed)
-            currentSpawnDelay = Mathf.Max(minimumSpawnDelay, 
-                initialSpawnDelay - (difficultyLevel * difficultyIncreaseRate));
-            
-            // Increase obstacle chance
-            currentObstacleChance = Mathf.Min(maxObstacleChance, 
-                baseObstacleChance + (difficultyLevel * obstacleChanceIncrease));
-            
-            // Decrease power-up frequency (make them rarer)
-            currentPowerUpFrequency = Mathf.Min(maxPowerUpFrequency, 
-                basePowerUpFrequency + (difficultyLevel / 2));
-            powerUpFrequency = currentPowerUpFrequency;
-            
-            // Increase freeze circle chance
-            currentFreezeChance = Mathf.Min(maxFreezeChance, 
-                baseFreezeChance + (difficultyLevel * freezeChanceIncrease));
-            
-            Debug.Log($"Difficulty Level: {difficultyLevel}, Spawn Delay: {currentSpawnDelay:F2}s, " +
-                     $"Obstacle Chance: {currentObstacleChance:F2}, Freeze Chance: {currentFreezeChance:F2}");
-        }
+        currentArcRate = baseArcRate;
+        
+        // Log game start with initial difficulty settings
+        Debug.Log("=== GAME STARTED ===");
+        Debug.Log($"Initial Difficulty Level: {difficultyLevel}");
+        Debug.Log($"Spawn Delay: {currentSpawnDelay:F2}s | Obstacle Chance: {currentObstacleChance:F2} | Power-up Chance: {currentPowerUpChance:F2} | Freeze Chance: {currentFreezeChance:F2} | Arc Rate: {currentArcRate:F2}");
+        Debug.Log($"Difficulty will increase every {spawnRateIncreaseInterval} seconds");
+        
+        StartCoroutine(spawnTile());
+        StartCoroutine(IncreaseDifficulty());
     }
 
-    IEnumerator SpawnTile()
+    void Update()
     {
-        while (!isGamePaused)
-        {
-            yield return new WaitForSeconds(currentSpawnDelay);
-            
-            // Increment tile counter
-            tileCounter++;
-            
-            // Update difficulty based on progress
-            UpdateDifficulty();
+
+    }
+
+    IEnumerator spawnTile()
+    {
+        yield return new WaitForSeconds(currentSpawnDelay);
+        
+        // Increment tile counter
+        tileCounter++;
         
         // Choose distinct lanes for each object type
         int[] lanes = { -1, 0, 1 };
@@ -212,31 +130,32 @@ public class Mapgameflow : MonoBehaviour
         nextPowerUpSpawn.z += 2.5f; // Position after obstacles to avoid direct overlap
 
         // Instantiate tiles without destruction
-        Instantiate(tileObj, nextTileSpawn, tileObj.rotation);
+        GameObject tile1 = Instantiate(tileObj, nextTileSpawn, tileObj.rotation).gameObject;
 
-        // Instantiate bricks without destruction
-        Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation);
-
-        // Instantiate obstacles based on difficulty
-        if (obstacleObj != null && Random.value < currentObstacleChance)
+        // Instantiate bricks based on difficulty
+        if (Random.value < currentObstacleChance)
         {
-            Instantiate(obstacleObj, nextObstacleSpawn, obstacleObj.rotation);
-            
-            // At higher difficulty levels, sometimes spawn double obstacles
-            if (difficultyLevel >= 5 && Random.value < 0.3f)
+            GameObject brick = Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation).gameObject;
+            if (difficultyLevel >= 5) // Only log after level 5 to avoid spam
             {
-                Vector3 doubleObstaclePos = nextObstacleSpawn;
-                doubleObstaclePos.z += 1.5f; // Spawn another obstacle close behind
-                Instantiate(obstacleObj, doubleObstaclePos, obstacleObj.rotation);
+                Debug.Log($"🧱 Brick spawned at lane {obstacleLane} (Chance: {(currentObstacleChance * 100):F0}%)");
             }
         }
 
-        // Coin xuất hiện với tỉ lệ arc tăng theo độ khó
+        // Instantiate new obstacle based on difficulty
+        if (obstacleObj != null && Random.value < currentObstacleChance)
+        {
+            GameObject obstacle = Instantiate(obstacleObj, nextObstacleSpawn, obstacleObj.rotation).gameObject;
+            if (difficultyLevel >= 5) // Only log after level 5 to avoid spam
+            {
+                Debug.Log($"🚧 Obstacle spawned at lane {brickLane} (Chance: {(currentObstacleChance * 100):F0}%)");
+            }
+        }
+
+        // Coin xuất hiện với tỉ lệ vòng cung tăng theo độ khó
         if (coinObj != null)
         {
-            // Increase arc rate based on difficulty for more challenging coin patterns
-            float arcRate = Mathf.Min(0.6f, 0.3f + (difficultyLevel * 0.05f));
-            if (Random.value < arcRate)
+            if (Random.value < currentArcRate)
             {
                 // Coin vòng cung (parabol)
                 Vector3 coinPosition = nextCoinSpawn;
@@ -253,7 +172,7 @@ public class Mapgameflow : MonoBehaviour
                         float y = jumpForce * t + 0.5f * gravity * t * t;
                         spawnPos.y = 0.2f + y;
                     }
-                    Instantiate(coinObj, spawnPos, coinObj.rotation);
+                    GameObject coin = Instantiate(coinObj, spawnPos, coinObj.rotation).gameObject;
                     // Chỉ coin vòng cung mới có object phía dưới coin thứ 3
                     if (i == 2 && (bricksObj != null || obstacleObj != null))
                     {
@@ -280,24 +199,14 @@ public class Mapgameflow : MonoBehaviour
                 for (int i = 0; i < 5; i++)
                 {
                     Vector3 spawnPos = coinPosition;
-                    Instantiate(coinObj, spawnPos, coinObj.rotation);
+                    GameObject coin = Instantiate(coinObj, spawnPos, coinObj.rotation).gameObject;
                     coinPosition.z += dz;
                 }
             }
         }
 
-        // Spawn coin multiplier power-up (x2 coins)
-        if (coinMultiplierPowerUp != null && tileCounter % multiplierPowerUpFrequency == 0)
-        {
-            Vector3 multiplierPos = nextPowerUpSpawn;
-            multiplierPos.y = 0.3f; // Slightly higher than other power-ups
-            multiplierPos.z += 1.0f; // Different Z position to avoid overlap
-            Instantiate(coinMultiplierPowerUp, multiplierPos, coinMultiplierPowerUp.rotation);
-            Debug.Log("Coin Multiplier x2 spawned!");
-        }
-
-        // Check if it's time to spawn a power-up (every powerUpFrequency tiles)
-        if (tileCounter % powerUpFrequency == 0)
+        // Check if it's time to spawn a power-up (every powerUpFrequency tiles) and use difficulty-based chance
+        if (tileCounter % powerUpFrequency == 0 && Random.value < currentPowerUpChance)
         {
             // Random chọn 1 trong 3 power-up: Thunder, Time, Invisible
             List<Transform> powerUps = new List<Transform>();
@@ -311,10 +220,10 @@ public class Mapgameflow : MonoBehaviour
             }
         }
 
-        // Spawn vật cản đặc biệt: freeze circle với tỉ lệ tăng theo độ khó
+        // Spawn vật cản đặc biệt: freeze circle với difficulty-based chance
         if (freezeCircleObj != null)
         {
-            // Tỉ lệ xuất hiện freeze circle tăng theo độ khó
+            // Sử dụng currentFreezeChance thay vì 20% cố định
             if (Random.value < currentFreezeChance)
             {
                 int[] lanesForFreeze = { -1, 0, 1 };
@@ -326,47 +235,107 @@ public class Mapgameflow : MonoBehaviour
                 freezePos.y = 0.1f;
                 freezePos.z += 4.0f; // Đặt xa hơn coin/power/vật cản khác trên trục Z
                 Instantiate(freezeCircleObj, freezePos, freezeCircleObj.rotation);
-                
-                // At very high difficulty, sometimes spawn multiple freeze circles
-                if (difficultyLevel >= 8 && Random.value < 0.2f)
-                {
-                    possibleLanes.Remove(freezeLane);
-                    if (possibleLanes.Count > 0)
-                    {
-                        int secondFreezeLane = possibleLanes[Random.Range(0, possibleLanes.Count)];
-                        Vector3 secondFreezePos = freezePos;
-                        secondFreezePos.x = secondFreezeLane;
-                        secondFreezePos.z += 1.5f;
-                        Instantiate(freezeCircleObj, secondFreezePos, freezeCircleObj.rotation);
-                    }
-                }
             }
         }
 
         nextTileSpawn.z += 3;
 
         // Instantiate second tile without destruction
-        Instantiate(tileObj, nextTileSpawn, tileObj.rotation);
+        GameObject tile2 = Instantiate(tileObj, nextTileSpawn, tileObj.rotation).gameObject;
 
         nextTileSpawn.z += 3;
-        
-        // Continue spawning only if not paused
-        if (!isGamePaused)
-        {
-            StartCoroutine(SpawnTile());
-        }
-        }
+        StartCoroutine(spawnTile());
     }
-    
-    // Public method to get current difficulty info (for UI display)
-    public string GetDifficultyInfo()
+
+    // Coroutine to progressively increase difficulty
+    IEnumerator IncreaseDifficulty()
     {
-        return $"Level: {difficultyLevel} | Speed: {(1/currentSpawnDelay):F1}x | Obstacles: {(currentObstacleChance*100):F0}%";
+        while (true)
+        {
+            yield return new WaitForSeconds(spawnRateIncreaseInterval);
+            
+            difficultyLevel++;
+            
+            // Decrease spawn delay (faster spawning)
+            currentSpawnDelay = Mathf.Max(minSpawnDelay, currentSpawnDelay - spawnDelayDecrease);
+            
+            // Increase obstacle spawn chance
+            currentObstacleChance = Mathf.Min(maxObstacleChance, currentObstacleChance + obstacleChanceIncrease);
+            
+            // Decrease power-up spawn chance (make them rarer)
+            currentPowerUpChance = Mathf.Max(minPowerUpChance, currentPowerUpChance - powerUpChanceDecrease);
+            
+            // Increase freeze circle spawn chance
+            currentFreezeChance = Mathf.Min(maxFreezeChance, currentFreezeChance + freezeChanceIncrease);
+            
+            // Increase arc coin rate (more challenging coin patterns)
+            currentArcRate = Mathf.Min(maxArcRate, currentArcRate + arcRateIncrease);
+            
+            // Log difficulty level up with detailed information
+            Debug.Log("=== DIFFICULTY LEVEL UP! ===");
+            Debug.Log($"🔥 NEW DIFFICULTY LEVEL: {difficultyLevel}");
+            Debug.Log($"⚡ Spawn Speed: {currentSpawnDelay:F2}s (Min: {minSpawnDelay:F2}s)");
+            Debug.Log($"🚧 Obstacle Chance: {(currentObstacleChance * 100):F1}% (Max: {(maxObstacleChance * 100):F1}%)");
+            Debug.Log($"💎 Power-up Chance: {(currentPowerUpChance * 100):F1}% (Min: {(minPowerUpChance * 100):F1}%)");
+            Debug.Log($"❄️ Freeze Circle Chance: {(currentFreezeChance * 100):F1}% (Max: {(maxFreezeChance * 100):F1}%)");
+            Debug.Log($"🌙 Arc Coin Rate: {(currentArcRate * 100):F1}% (Max: {(maxArcRate * 100):F1}%)");
+            Debug.Log("==========================");
+            
+            // Check for max level achievements
+            if (currentSpawnDelay <= minSpawnDelay && difficultyLevel > 1)
+            {
+                Debug.Log("⚡ MAX SPEED REACHED! Spawning at maximum rate!");
+            }
+            
+            if (currentObstacleChance >= maxObstacleChance && difficultyLevel > 1)
+            {
+                Debug.Log("🚧 MAX OBSTACLE DENSITY! Every tile now has maximum obstacles!");
+            }
+            
+            if (currentPowerUpChance <= minPowerUpChance && difficultyLevel > 1)
+            {
+                Debug.Log("💎 MINIMUM POWER-UPS! Power-ups are now extremely rare!");
+            }
+            
+            if (currentFreezeChance >= maxFreezeChance && difficultyLevel > 1)
+            {
+                Debug.Log("❄️ MAX FREEZE RATE! Freeze circles are everywhere!");
+            }
+            
+            if (currentArcRate >= maxArcRate && difficultyLevel > 1)
+            {
+                Debug.Log("🌙 MAX ARC COINS! All coin patterns are now challenging arcs!");
+            }
+            
+            // Special milestone notifications
+            if (difficultyLevel == 5)
+            {
+                Debug.Log("🏆 MILESTONE: You've survived 5 difficulty levels! The game is getting intense!");
+            }
+            else if (difficultyLevel == 10)
+            {
+                Debug.Log("🔥 MILESTONE: Level 10 reached! You're in the danger zone now!");
+            }
+            else if (difficultyLevel == 15)
+            {
+                Debug.Log("⚡ MILESTONE: Level 15! Only the best players reach this far!");
+            }
+            else if (difficultyLevel % 20 == 0)
+            {
+                Debug.Log($"👑 LEGENDARY MILESTONE: Level {difficultyLevel}! You are a master player!");
+            }
+        }
+    }
+
+    // Public getter for current difficulty level
+    public int GetCurrentDifficultyLevel()
+    {
+        return difficultyLevel;
     }
     
-    // Public getter methods for other scripts to access difficulty values
-    public int GetDifficultyLevel() => difficultyLevel;
-    public float GetCurrentSpawnDelay() => currentSpawnDelay;
-    public float GetCurrentObstacleChance() => currentObstacleChance;
-    public float GetCurrentFreezeChance() => currentFreezeChance;
+    // Public getter for current difficulty stats
+    public string GetDifficultyStats()
+    {
+        return $"Level {difficultyLevel} | Speed: {currentSpawnDelay:F2}s | Obstacles: {(currentObstacleChance * 100):F0}% | Power-ups: {(currentPowerUpChance * 100):F0}%";
+    }
 }
