@@ -9,6 +9,7 @@ TagManager:
   - Thunder
   - Time
   - Invisible
+  - FreezeCircle
   layers:
   - Default
   - TransparentFX

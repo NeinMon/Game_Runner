@@ -14,10 +14,9 @@ public class Mapgameflow : MonoBehaviour
     private Vector3 nextCoinSpawn;
     public Transform speedUpObj; // Speed boost power-up
     public Transform slowDownObj; // Speed decrease power-up
-    public Transform invisibleObj; // Invisible power-up
-
+    public Transform invisiblePowerObj; // Invisible power-up
+    public Transform freezeCircleObj; // Freeze circle power-up
     private Vector3 nextPowerUpSpawn;
-    private Vector3 nextInvisibleSpawn;
     
     private int tileCounter = 0; // Counter to track tiles spawned
     public int powerUpFrequency = 3; // Spawn power-up every X tiles
@@ -58,16 +57,16 @@ public class Mapgameflow : MonoBehaviour
         int obstacleLane = lanes[1];
         int coinLane = lanes[2];
 
-        // Setup brick position
-        nextBrickSpawn = nextTileSpawn;
-        nextBrickSpawn.x = brickLane;
-        nextBrickSpawn.y = 0.1f;
-
         // Setup obstacle position (different lane than brick)
         nextObstacleSpawn = nextTileSpawn;
-        nextObstacleSpawn.x = obstacleLane;
-        nextObstacleSpawn.y = 0f;
-        nextObstacleSpawn.z += 1.5f; // Offset in Z direction
+        nextObstacleSpawn.x = brickLane;
+        nextObstacleSpawn.y = 0.1f;
+
+        // Setup brick position (different lane than obstacle)
+        nextBrickSpawn = nextTileSpawn;
+        nextBrickSpawn.x = obstacleLane;
+        nextBrickSpawn.y = 0f;
+        nextBrickSpawn.z += 1.5f; // Offset in Z direction
 
         // Setup coin position (different lane than both brick and obstacle)
         nextCoinSpawn = nextTileSpawn;
@@ -81,13 +80,6 @@ public class Mapgameflow : MonoBehaviour
         nextPowerUpSpawn.y = 0.2f;
         nextPowerUpSpawn.z += 2.5f; // Position after obstacles to avoid direct overlap
 
-        // Setup invisible power-up position - random lane khác với coin
-        nextInvisibleSpawn = nextTileSpawn;
-        int[] powerUpLanes = { brickLane, obstacleLane };
-        nextInvisibleSpawn.x = powerUpLanes[Random.Range(0, powerUpLanes.Length)];
-        nextInvisibleSpawn.y = 0.2f;
-        nextInvisibleSpawn.z += 2.5f;
-
         // Instantiate tiles without destruction
         GameObject tile1 = Instantiate(tileObj, nextTileSpawn, tileObj.rotation).gameObject;
 
@@ -100,32 +92,90 @@ public class Mapgameflow : MonoBehaviour
             GameObject obstacle = Instantiate(obstacleObj, nextObstacleSpawn, obstacleObj.rotation).gameObject;
         }
 
-        // Instantiate 5 coins in succession
+        // Coin xuất hiện: 70% thẳng hàng, 30% vòng cung (parabol, có object dưới coin giữa)
         if (coinObj != null)
         {
-            Vector3 coinPosition = nextCoinSpawn;
-            for (int i = 0; i < 5; i++)
+            float arcRate = 0.3f;
+            if (Random.value < arcRate)
             {
-                GameObject coin = Instantiate(coinObj, coinPosition, coinObj.rotation).gameObject;
-                coinPosition.z += 0.7f; // Space between consecutive coins
+                // Coin vòng cung (parabol)
+                Vector3 coinPosition = nextCoinSpawn;
+                float jumpForce = 2.1f;
+                float gravity = -5f;
+                float tMax = -2 * jumpForce / gravity;
+                float dz = 0.7f;
+                for (int i = 0; i < 5; i++)
+                {
+                    Vector3 spawnPos = coinPosition;
+                    if (i >= 1 && i <= 3)
+                    {
+                        float t = (i) / 4.0f * tMax;
+                        float y = jumpForce * t + 0.5f * gravity * t * t;
+                        spawnPos.y = 0.2f + y;
+                    }
+                    GameObject coin = Instantiate(coinObj, spawnPos, coinObj.rotation).gameObject;
+                    // Chỉ coin vòng cung mới có object phía dưới coin thứ 3
+                    if (i == 2 && (bricksObj != null || obstacleObj != null))
+                    {
+                        Vector3 belowCoin = spawnPos;
+                        if (Random.value < 0.5f && bricksObj != null)
+                        {
+                            belowCoin.y = 0f;
+                            Instantiate(bricksObj, belowCoin, bricksObj.rotation);
+                        }
+                        else if (obstacleObj != null)
+                        {
+                            belowCoin.y = 0.1f;
+                            Instantiate(obstacleObj, belowCoin, obstacleObj.rotation);
+                        }
+                    }
+                    coinPosition.z += dz;
+                }
+            }
+            else
+            {
+                // Coin thẳng hàng như bình thường, không có object phía dưới
+                Vector3 coinPosition = nextCoinSpawn;
+                float dz = 0.7f;
+                for (int i = 0; i < 5; i++)
+                {
+                    Vector3 spawnPos = coinPosition;
+                    GameObject coin = Instantiate(coinObj, spawnPos, coinObj.rotation).gameObject;
+                    coinPosition.z += dz;
+                }
             }
         }
 
         // Check if it's time to spawn a power-up (every powerUpFrequency tiles)
         if (tileCounter % powerUpFrequency == 0)
         {
-            float rand = Random.value;
-            if (rand < 0.5f && speedUpObj != null)
+            // Random chọn 1 trong 3 power-up: Thunder, Time, Invisible
+            List<Transform> powerUps = new List<Transform>();
+            if (speedUpObj != null) powerUps.Add(speedUpObj); // Thunder
+            if (slowDownObj != null) powerUps.Add(slowDownObj); // Time
+            if (invisiblePowerObj != null) powerUps.Add(invisiblePowerObj); // Invisible
+            if (powerUps.Count > 0)
             {
-                GameObject speedUp = Instantiate(speedUpObj, nextPowerUpSpawn, speedUpObj.rotation).gameObject;
+                int idx = Random.Range(0, powerUps.Count);
+                Instantiate(powerUps[idx], nextPowerUpSpawn, powerUps[idx].rotation);
             }
-            else if (rand < 0.8f && slowDownObj != null)
+        }
+
+        // Spawn vật cản đặc biệt: freeze circle (nếu có)
+        if (freezeCircleObj != null)
+        {
+            // 20% tỉ lệ xuất hiện freeze circle ở lane ngẫu nhiên, không trùng với coinLane
+            if (Random.value < 0.2f)
             {
-                GameObject slowDown = Instantiate(slowDownObj, nextPowerUpSpawn, slowDownObj.rotation).gameObject;
-            }
-            else if (invisibleObj != null)
-            {
-                GameObject invisible = Instantiate(invisibleObj, nextInvisibleSpawn, invisibleObj.rotation).gameObject;
+                int[] lanesForFreeze = { -1, 0, 1 };
+                List<int> possibleLanes = new List<int>(lanesForFreeze);
+                possibleLanes.Remove(coinLane); // Không trùng lane với coin
+                int freezeLane = possibleLanes[Random.Range(0, possibleLanes.Count)];
+                Vector3 freezePos = nextTileSpawn;
+                freezePos.x = freezeLane;
+                freezePos.y = 0.1f;
+                freezePos.z += 4.0f; // Đặt xa hơn coin/power/vật cản khác trên trục Z
+                Instantiate(freezeCircleObj, freezePos, freezeCircleObj.rotation);
             }
         }
 
