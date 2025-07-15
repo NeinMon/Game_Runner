@@ -525,6 +525,21 @@ MonoBehaviour:
   invisiblePowerObj: {fileID: 550241174}
   freezeCircleObj: {fileID: 1726683227}
   powerUpFrequency: 3
+  spawnRateIncreaseInterval: 10
+  minSpawnDelay: 0.3
+  spawnDelayDecrease: 0.05
+  baseObstacleChance: 0.8
+  maxObstacleChance: 0.95
+  obstacleChanceIncrease: 0.02
+  basePowerUpChance: 0.6
+  minPowerUpChance: 0.3
+  powerUpChanceDecrease: 0.03
+  baseFreezeChance: 0.2
+  maxFreezeChance: 0.4
+  freezeChanceIncrease: 0.01
+  baseArcRate: 0.3
+  maxArcRate: 0.6
+  arcRateIncrease: 0.02
 --- !u!1 &82179060
 GameObject:
   m_ObjectHideFlags: 0
