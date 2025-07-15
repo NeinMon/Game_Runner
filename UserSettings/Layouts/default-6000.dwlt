@@ -218,8 +218,8 @@ MonoBehaviour:
     y: 0
     width: 324.8
     height: 444
-  m_MinSize: {x: 275, y: 50}
-  m_MaxSize: {x: 4000, y: 4000}
+  m_MinSize: {x: 277, y: 76}
+  m_MaxSize: {x: 4002, y: 4026}
   m_ActualView: {fileID: 14}
   m_Panes:
   - {fileID: 14}
@@ -406,7 +406,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 79.200005
+    y: 24
     width: 251
     height: 418
   m_SerializedDataModeController:
@@ -471,8 +471,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Inspector\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 252
-    y: 79.200005
+    x: 253
+    y: 24
     width: 322.8
     height: 418
   m_SerializedDataModeController:
@@ -520,8 +520,8 @@ MonoBehaviour:
     m_TextWithWhitespace: "Scene\u200B"
   m_Pos:
     serializedVersion: 2
-    x: 576.8
-    y: 79.200005
+    x: 577.8
+    y: 24
     width: 958.2
     height: 418
   m_SerializedDataModeController:
@@ -1030,7 +1030,7 @@ MonoBehaviour:
   m_Rotation:
     m_Target: {x: -0.27541465, y: 0.6293338, z: -0.25491518, w: -0.6808428}
     speed: 2
-    m_Value: {x: -0.27535367, y: 0.62919444, z: -0.25485873, w: -0.6806921}
+    m_Value: {x: -0.27541465, y: 0.6293338, z: -0.25491518, w: -0.6808428}
   m_Size:
     m_Target: 17.535995
     speed: 2
@@ -4941,7 +4941,7 @@ MonoBehaviour:
   m_Pos:
     serializedVersion: 2
     x: 0
-    y: 523.2
+    y: 468
     width: 1536
     height: 246.79999
   m_SerializedDataModeController:
@@ -4985,21 +4985,21 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 125.20001}
     m_SelectedIDs: 20c50000
     m_LastClickedID: 50464
-    m_ExpandedIDs: 0000000068c200006ac200006cc200006ec2000070c2000072c2000074c2000076c2000078c200007ac200007cc200007ec2000080c2000082c2000084c2000086c2000088c200008ac200008cc200008ec2000090c2000092c2000094c2000096c2000098c200009ac200009cc200009ec20000a0c20000c2c4000000ca9a3b
+    m_ExpandedIDs: 000000005eb8000060b8000062b8000064b8000066b8000068b800006ab800006cb800006eb8000070b8000072b8000074b8000076b8000078b800007ab800007cb800007eb8000080b8000082b8000084b8000086b8000088b800008ab800008cb800008eb8000090b8000092b8000094b8000096b80000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: Picola
-      m_OriginalName: Picola
+      m_Name: 
+      m_OriginalName: 
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 50466
+      m_UserData: 0
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
-      m_OriginalEventType: 0
+      m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
       m_ClientGUIView: {fileID: 11}
@@ -5014,7 +5014,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 0000000068c200006ac200006cc200006ec2000070c2000072c2000074c2000076c2000078c200007ac200007cc200007ec2000080c2000082c2000084c2000086c2000088c200008ac200008cc200008ec2000090c2000092c2000094c2000096c2000098c200009ac200009cc200009ec20000a0c20000a2c20000
+    m_ExpandedIDs: 000000005eb8000060b8000062b8000064b8000066b8000068b800006ab800006cb800006eb8000070b8000072b8000074b8000076b8000078b800007ab800007cb800007eb8000080b8000082b8000084b8000086b8000088b800008ab800008cb800008eb8000090b8000092b8000094b8000096b80000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
