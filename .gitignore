@@ -15,3 +15,5 @@ Assets/AssetStoreTools*
 *.apk
 *.aab
 *.log
+/Assets/Firebase
+Assets/Firebase.meta

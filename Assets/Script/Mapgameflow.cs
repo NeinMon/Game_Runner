@@ -9,49 +9,53 @@ public class Mapgameflow : MonoBehaviour
     public Transform tileObj;           // Prefab tile nền đường
     private Vector3 nextTileSpawn;      // Vị trí spawn tile tiếp theo
     public Transform bricksObj;         // Prefab gạch (vật cản)
+    public Transform highObject; // Prefab đối tượng cao
+    public float minDistanceBetweenHighObjects = 8f; // Khoảng cách tối thiểu giữa 2 highObject
+    private float lastHighObjectZ = -999f; // Vị trí Z cuối cùng spawn highObject
+
     private Vector3 nextBrickSpawn;     // Vị trí spawn gạch tiếp theo
     public Transform obstacleObj;       // Prefab vật cản mới
     private Vector3 nextObstacleSpawn;  // Vị trí spawn vật cản tiếp theo
     public Transform coinObj;           // Prefab coin (tiền xu)
     private Vector3 nextCoinSpawn;      // Vị trí spawn coin tiếp theo
-    
+
     // === POWER-UPS ===
     public Transform speedUpObj;        // Power-up tăng tốc (Thunder)
     public Transform slowDownObj;       // Power-up giảm tốc (Time)
     public Transform invisiblePowerObj; // Power-up vô hình (Invisible)
     public Transform freezeCircleObj;   // Power-up đóng băng (Freeze Circle)
     private Vector3 nextPowerUpSpawn;   // Vị trí spawn power-up tiếp theo
-    
+
     // === COUNTERS VÀ FREQUENCY ===
     private int tileCounter = 0;        // Đếm số tile đã spawn
     public int powerUpFrequency = 3;    // Spawn power-up mỗi X tiles
-    
+
     // === CÀI ĐẶT ĐỘ KHÓ - DIFFICULTY PROGRESSION ===
     [Header("Cài đặt độ khó")]
     public float spawnRateIncreaseInterval = 10f; // Tăng độ khó mỗi 30 giây
     public float minSpawnDelay = 0.3f;            // Thời gian spawn tối thiểu giữa các tile
     public float spawnDelayDecrease = 0.05f;      // Giảm bao nhiêu thời gian spawn mỗi lần tăng độ khó
-    
+
     [Header("Mật độ vật cản")]
     public float baseObstacleChance = 0.8f;       // Tỷ lệ spawn vật cản ban đầu
     public float maxObstacleChance = 0.95f;       // Tỷ lệ spawn vật cản tối đa
     public float obstacleChanceIncrease = 0.02f;  // Tăng tỷ lệ vật cản mỗi level
-    
+
     [Header("Điều chỉnh Power-up")]
     public float basePowerUpChance = 0.6f;        // Tỷ lệ spawn power-up ban đầu
     public float minPowerUpChance = 0.3f;         // Tỷ lệ spawn power-up tối thiểu
     public float powerUpChanceDecrease = 0.03f;   // Giảm tỷ lệ power-up khi game khó hơn
-    
+
     [Header("Tiến trình Freeze Circle")]
     public float baseFreezeChance = 0.2f;         // Tỷ lệ freeze circle ban đầu
     public float maxFreezeChance = 0.4f;          // Tỷ lệ freeze circle tối đa
     public float freezeChanceIncrease = 0.01f;    // Tăng tỷ lệ freeze circle
-    
+
     [Header("Tiến trình Coin vòng cung")]
     public float baseArcRate = 0.3f;              // Tỷ lệ coin vòng cung ban đầu
     public float maxArcRate = 0.6f;               // Tỷ lệ coin vòng cung tối đa
     public float arcRateIncrease = 0.02f;         // Tăng tỷ lệ coin vòng cung theo độ khó
-    
+
     // === BIẾN RUNTIME - CÁC GIÁ TRỊ THAY ĐỔI TRONG GAME ===
     private float currentSpawnDelay = 1f;         // Thời gian spawn hiện tại
     private float currentObstacleChance;          // Tỷ lệ vật cản hiện tại
@@ -64,17 +68,17 @@ public class Mapgameflow : MonoBehaviour
     void Start()
     {
         nextTileSpawn.z = 18; // Đặt vị trí spawn tile đầu tiên
-        
+
         // Khởi tạo các giá trị độ khó ban đầu
         currentSpawnDelay = 1f;
         currentObstacleChance = baseObstacleChance;
         currentPowerUpChance = basePowerUpChance;
         currentFreezeChance = baseFreezeChance;
         currentArcRate = baseArcRate;
-        
+
         // Ghi log thông tin game bắt đầu
         Debug.Log("=== GAME BẮT ĐẦU ===");
-        
+
         // Bắt đầu spawn tile và tăng độ khó
         StartCoroutine(spawnTile());
         StartCoroutine(IncreaseDifficulty());
@@ -90,14 +94,14 @@ public class Mapgameflow : MonoBehaviour
     IEnumerator spawnTile()
     {
         yield return new WaitForSeconds(currentSpawnDelay); // Chờ theo thời gian spawn hiện tại
-        
+
         // Tăng bộ đếm tile
         tileCounter++;
-        
+
         // Chọn các lane khác nhau cho từng loại đối tượng (-1: trái, 0: giữa, 1: phải)
         int[] lanes = { -1, 0, 1 };
         System.Random rnd = new System.Random();
-        
+
         // Thuật toán Fisher-Yates để xáo trộn ngẫu nhiên các lane
         for (int i = lanes.Length - 1; i > 0; i--)
         {
@@ -106,7 +110,7 @@ public class Mapgameflow : MonoBehaviour
             lanes[i] = lanes[j];
             lanes[j] = temp;
         }
-        
+
         // Gán các lane đã xáo trộn cho từng đối tượng
         int brickLane = lanes[0];    // Lane cho gạch
         int obstacleLane = lanes[1]; // Lane cho vật cản
@@ -141,7 +145,26 @@ public class Mapgameflow : MonoBehaviour
         // Tạo gạch dựa trên độ khó
         if (Random.value < currentObstacleChance)
         {
-            GameObject brick = Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation).gameObject;
+            if (bricksObj != null && Random.value < currentObstacleChance)
+            {
+                Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation);
+            }
+        }
+
+        if (highObject != null)
+        {
+            if (Mathf.Abs(nextTileSpawn.z - lastHighObjectZ) >= minDistanceBetweenHighObjects)
+            {
+                if (Random.value < 0.8f) // 30% xác suất xuất hiện highObject
+                {
+                    Vector3 highObjPos = nextTileSpawn;
+                    highObjPos.x = 0;        // Center lane (hoặc chọn lane như coin)
+                    highObjPos.z += 3f;      // Sau coin
+
+                    Instantiate(highObject, highObjPos, highObject.rotation);
+                    lastHighObjectZ = highObjPos.z; // Cập nhật vị trí spawn gần nhất
+                }
+            }
         }
 
         // Tạo vật cản mới dựa trên độ khó
@@ -161,12 +184,12 @@ public class Mapgameflow : MonoBehaviour
                 float gravity = -5f;       // Trọng lực (âm để kéo coin xuống)
                 float tMax = -2 * jumpForce / gravity; // Thời gian đạt đỉnh parabol
                 float dz = 0.7f;          // Khoảng cách Z giữa các coin
-                
+
                 // Tạo 5 coin theo đường parabol
                 for (int i = 0; i < 5; i++)
                 {
                     Vector3 spawnPos = coinPosition;
-                    
+
                     // Chỉ coin thứ 2, 3, 4 (index 1,2,3) mới tạo hiệu ứng nhảy
                     if (i >= 1 && i <= 3)
                     {
@@ -176,7 +199,7 @@ public class Mapgameflow : MonoBehaviour
                         float y = jumpForce * t + 0.5f * gravity * t * t;
                         spawnPos.y = 0.2f + y; // 0.2f là chiều cao cơ bản + độ cao parabol
                     }
-                    
+
                     GameObject coin = Instantiate(coinObj, spawnPos, coinObj.rotation).gameObject;
                     // Chỉ đặt vật cản phía dưới coin thứ 3 khi là coin vòng cung
                     if (i == 2 && (bricksObj != null || obstacleObj != null))
@@ -240,7 +263,10 @@ public class Mapgameflow : MonoBehaviour
                 freezePos.x = freezeLane;
                 freezePos.y = 0.1f;
                 freezePos.z += 4.0f; // Đặt xa hơn coin/power-up/vật cản khác trên trục Z
-                Instantiate(freezeCircleObj, freezePos, freezeCircleObj.rotation);
+                if (freezeCircleObj != null && Random.value < currentFreezeChance)
+                {
+                    Instantiate(freezeCircleObj, freezePos, freezeCircleObj.rotation);
+                }
             }
         }
 
@@ -259,28 +285,28 @@ public class Mapgameflow : MonoBehaviour
         while (true)
         {
             yield return new WaitForSeconds(spawnRateIncreaseInterval); // Chờ theo interval tăng độ khó
-            
+
             difficultyLevel++; // Tăng level độ khó
-            
+
             // Giảm thời gian spawn (spawn nhanh hơn)
             currentSpawnDelay = Mathf.Max(minSpawnDelay, currentSpawnDelay - spawnDelayDecrease);
-            
+
             // Tăng tỷ lệ spawn vật cản
             currentObstacleChance = Mathf.Min(maxObstacleChance, currentObstacleChance + obstacleChanceIncrease);
-            
+
             // Giảm tỷ lệ spawn power-up (làm chúng hiếm hơn)
             currentPowerUpChance = Mathf.Max(minPowerUpChance, currentPowerUpChance - powerUpChanceDecrease);
-            
+
             // Tăng tỷ lệ spawn freeze circle
             currentFreezeChance = Mathf.Min(maxFreezeChance, currentFreezeChance + freezeChanceIncrease);
-            
+
             // Tăng tỷ lệ coin vòng cung (pattern coin khó khăn hơn)
             currentArcRate = Mathf.Min(maxArcRate, currentArcRate + arcRateIncrease);
-            
+
             // Ghi log thông tin khi tăng level độ khó
             Debug.Log($"🔥 LEVEL ĐỘ KHÓ MỚI: {difficultyLevel} | Tốc độ: {currentSpawnDelay:F2}s | Vật cản: {(currentObstacleChance * 100):F0}%");
-            
-            
+
+
             // Thông báo mốc đặc biệt quan trọng
             if (difficultyLevel == 5)
             {
@@ -306,7 +332,7 @@ public class Mapgameflow : MonoBehaviour
     {
         return difficultyLevel;
     }
-    
+
     // Hàm public để lấy thống kê độ khó hiện tại
     public string GetDifficultyStats()
     {

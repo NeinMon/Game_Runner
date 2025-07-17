@@ -517,13 +517,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileObj: {fileID: 1745547926}
-  bricksObj: {fileID: 843264645}
+  bricksObj: {fileID: 0}
   obstacleObj: {fileID: 980048632}
   coinObj: {fileID: 1703551703}
   speedUpObj: {fileID: 1307834628}
   slowDownObj: {fileID: 1875913680}
   invisiblePowerObj: {fileID: 550241174}
-  freezeCircleObj: {fileID: 1726683227}
+  freezeCircleObj: {fileID: 0}
   powerUpFrequency: 3
   spawnRateIncreaseInterval: 10
   minSpawnDelay: 0.3

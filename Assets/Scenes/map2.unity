@@ -517,9 +517,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileObj: {fileID: 1745547926}
-  bricksObj: {fileID: 0}
-  highObject: {fileID: 1863228035053402579, guid: 90f981310a8594b4fba370bad5bfa697, type: 3}
-  minDistanceBetweenHighObjects: 12
+  bricksObj: {fileID: 5912314069480421316, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
   obstacleObj: {fileID: 980048632}
   coinObj: {fileID: 1703551703}
   speedUpObj: {fileID: 1307834628}
