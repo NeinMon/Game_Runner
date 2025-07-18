@@ -28,7 +28,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float slowDuration = 3f; // Thời gian chạy chậm (giây)
     [SerializeField] private float fastMultiplier = 2f;
     [SerializeField] private float slowMultiplier = 0.5f;
-    [SerializeField] private TMP_Text scoreText;
+    [SerializeField] private Text scoreText;
     [SerializeField] private float minForwardSpeed = 1f;
     [SerializeField] private float maxForwardSpeed = 4f;
     [SerializeField] private float speedIncreaseRate = 0.05f;
@@ -48,8 +48,6 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private ParticleSystem invisibleEffect; // Hiệu ứng khi tàng hình
     [SerializeField] private ParticleSystem thunderEffect; // Hiệu ứng khi ăn Thunder
     [SerializeField] private ParticleSystem timeEffect;    // Hiệu ứng khi ăn Time
-    [SerializeField] private ParticleSystem freezeEffect; // Hiệu ứng băng
-    private bool isFreezing = false; // Cờ kiểm soát hiệu ứng freeze
 
     void Start()
     {
@@ -227,20 +225,6 @@ public class Player_Controller : MonoBehaviour
             StartCoroutine(InvisibleCoroutine());
             Destroy(other.gameObject);
         }
-        else if (other.CompareTag("FreezeCircle"))
-        {
-            if (!isFreezing)
-            {
-                isFreezing = true;
-                if (freezeEffect != null)
-                {
-                    freezeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-                    freezeEffect.Play();
-                    StartCoroutine(StopFreezeEffectAfterDuration(2f));
-                }
-                StartCoroutine(FreezeAndRestartCoroutine());
-            }
-        }
     }
 
     private System.Collections.IEnumerator SpeedBoost()
@@ -284,24 +268,6 @@ public class Player_Controller : MonoBehaviour
         if (invisibleEffect != null) invisibleEffect.Stop();
         Debug.Log("[InvisibleCoroutine] Hết tàng hình");
         Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Car"), false);
-    }
-
-    private System.Collections.IEnumerator FreezeAndRestartCoroutine()
-    {
-        isGameStarted = false;
-        if (player_Animation != null)
-            player_Animation.SetFloat("is_running", 0.0f);
-        yield return new WaitForSeconds(2f); // Đợi hiệu ứng băng 2 giây
-        if (restartPanel != null)
-            restartPanel.SetActive(true);
-        isFreezing = false; // Reset cờ cho lần sau
-    }
-
-    private System.Collections.IEnumerator StopFreezeEffectAfterDuration(float duration)
-    {
-        yield return new WaitForSeconds(duration);
-        if (freezeEffect != null)
-            freezeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     public void PlayGame()

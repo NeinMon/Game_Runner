@@ -57,5 +57,6 @@ public class Camera_Follow : MonoBehaviour
         // Tính toán offset dựa trên vị trí ban đầu của camera và vị trí hiện tại của target
         offset = initialPosition - target.position;
         
+        Debug.Log("Camera offset được tính: " + offset);
     }
 }
