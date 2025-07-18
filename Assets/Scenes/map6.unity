@@ -3506,14 +3506,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileObj: {fileID: 754948624}
   bricksObj: {fileID: 11028003}
-  highObject: {fileID: 0}
+  highObject: {fileID: 1863228035053402579, guid: 90f981310a8594b4fba370bad5bfa697, type: 3}
   minDistanceBetweenHighObjects: 8
   obstacleObj: {fileID: 1141245448}
   coinObj: {fileID: 1795367308}
   speedUpObj: {fileID: 1403216299}
   slowDownObj: {fileID: 1243427146}
   invisiblePowerObj: {fileID: 191111365}
-  freezeCircleObj: {fileID: 0}
+  freezeCircleObj: {fileID: 2068343304}
   powerUpFrequency: 3
   spawnRateIncreaseInterval: 10
   minSpawnDelay: 0.3

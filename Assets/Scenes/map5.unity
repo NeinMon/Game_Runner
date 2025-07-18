@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &11028003 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 6224766151457928358, guid: 21b3fe37691cc2f408b5d2953c412d0f, type: 3}
-  m_PrefabInstance: {fileID: 2040918576}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &28646514
 GameObject:
   m_ObjectHideFlags: 0
@@ -3505,7 +3500,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileObj: {fileID: 754948624}
-  bricksObj: {fileID: 11028003}
+  bricksObj: {fileID: 0}
   highObject: {fileID: 0}
   minDistanceBetweenHighObjects: 8
   obstacleObj: {fileID: 1141245448}
@@ -3513,7 +3508,7 @@ MonoBehaviour:
   speedUpObj: {fileID: 1403216299}
   slowDownObj: {fileID: 1243427146}
   invisiblePowerObj: {fileID: 191111365}
-  freezeCircleObj: {fileID: 0}
+  freezeCircleObj: {fileID: 2068343304}
   powerUpFrequency: 3
   spawnRateIncreaseInterval: 10
   minSpawnDelay: 0.3
