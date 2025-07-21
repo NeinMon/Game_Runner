@@ -27,7 +27,7 @@ public class gameflow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void SpawnTile()

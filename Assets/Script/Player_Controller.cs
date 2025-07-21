@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Firebase.Auth;
 using TMPro;
 using UnityEngine;
@@ -25,6 +26,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private GameObject playPanel;
     [SerializeField] private GameObject wholeUIPanel;
     [SerializeField] private GameObject pausePanel;
+    [SerializeField] private GameObject popUp;
     private bool isGameStarted = false;
     private int score = 0;
     private int dis_long = 0;
@@ -57,9 +59,15 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private ParticleSystem thunderEffect; // Hiệu ứng khi ăn Thunder
     [SerializeField] private ParticleSystem timeEffect;    // Hiệu ứng khi ăn Time
 
+    private bool completed;
+    private string uid;
+    private string displayName;
+    private int scene_num;
+
     void Start()
     {
-        scoreRequire = new int[] { 100, 150, 200, 100, 150, 200 };
+        // scoreRequire = new int[] { 100, 150, 200, 100, 150, 200 };
+        scoreRequire = new int[] { 10, 15, 20, 10, 15, 20 };
         startPos = transform.position;
         controller = GetComponent<CharacterController>();
         baseSpeed = minForwardSpeed;
@@ -99,6 +107,28 @@ public class Player_Controller : MonoBehaviour
         renderers = GetComponentsInChildren<Renderer>();
         playerCollider = GetComponent<Collider>();
         // Đã xóa dòng invisibleEffect.Play() test
+
+        scene_num = GetSceneNumber();
+        var authService = AuthService.Instance;
+        if (authService == null)
+        {
+            Debug.LogWarning("authService is null (chưa đăng nhập?)");
+            return;
+        }
+        FirebaseUser user = authService.GetUser();
+        if (user == null)
+        {
+            Debug.LogWarning("User is null (chưa đăng nhập?)");
+            return;
+        }
+        uid = user?.UserId;
+        displayName = user?.DisplayName;
+        Debug.Log(uid.ToString());
+
+        DaoService.Instance.GetCompletedStatusOfUserInMap(GetSceneNumber(), uid, latest_completed_status =>
+        {
+            completed = latest_completed_status;
+        });
     }
 
     void Update()
@@ -150,6 +180,13 @@ public class Player_Controller : MonoBehaviour
             {
                 player_Animation.SetTrigger("is_sidejump");
             }
+        }
+
+        // UI for pop up
+        if (completed == false && (score >= scoreRequire[scene_num - 1]))
+        {
+            completed = true;
+            popUp.GetComponent<PopUpEffect>().StartFade();
         }
     }
 
@@ -234,12 +271,15 @@ public class Player_Controller : MonoBehaviour
             if ((normal.z < -0.5f || Mathf.Abs(normal.x) > 0.5f) && Mathf.Abs(normal.y) < 0.7f && normal.z < 0.5f)
             {
                 if (restartPanel != null)
+                {
+                    CloseAllPanels();
                     restartPanel.SetActive(true);
+                }
                 if (player_Animation != null)
                     player_Animation.SetFloat("is_running", 0.0f); // Chuyển về idle
                 isGameStarted = false; // Dừng toàn bộ gameplay
                 Debug.Log("CHUẨN BỊ LƯU DATA");
-                HandleSaveProgress();
+                HandleSaveProgressAndScore();
             }
             // Nếu va chạm phía sau xe hoặc từ trên xuống, không làm gì cả
         }
@@ -253,21 +293,25 @@ public class Player_Controller : MonoBehaviour
             Destroy(other.gameObject);
             if (scoreText != null)
                 scoreText.text = "" + score;
+            SoundManager.Instance.PlayCoinSFX();
         }
         else if (other.CompareTag("Thunder"))
         {
             StartCoroutine(SpeedBoost());
             Destroy(other.gameObject);
+            SoundManager.Instance.PlayPowerUpSFX();
         }
         else if (other.CompareTag("Time"))
         {
             StartCoroutine(SpeedSlow());
             Destroy(other.gameObject);
+            SoundManager.Instance.PlayPowerUpSFX();
         }
         else if (other.CompareTag("Invisible"))
         {
             StartCoroutine(InvisibleCoroutine());
             Destroy(other.gameObject);
+            SoundManager.Instance.PlayPowerUpSFX();
         }
     }
 
@@ -375,24 +419,26 @@ public class Player_Controller : MonoBehaviour
         return 0;
     }
 
-    private void HandleSaveProgress()
+    private void HandleSaveProgressAndScore()
     {
-        var authService = AuthService.Instance;
-        if (authService == null)
-        {
-            Debug.LogWarning("authService is null (chưa đăng nhập?)");
-            return;
-        }
-        FirebaseUser user = authService.GetUser();
-        if (user == null)
-        {
-            Debug.LogWarning("User is null (chưa đăng nhập?)");
-            return;
-        }
-        String uid = user?.UserId;
-        String displayName = user?.DisplayName;
-        Debug.Log(uid.ToString());
+
+        Debug.Log("REQUIRE SCORE FOR THIS SCENE: " + scoreRequire[scene_num - 1]);
         if (uid == null) return;
-        DaoService.Instance.SaveProgressForUser(GetSceneNumber(), uid, displayName, dis_long);
+        Debug.Log("CURRENT COMPLETED STATUS: " + completed.ToString());
+        DaoService.Instance.SaveProgressForUser(scene_num, uid, displayName, dis_long, completed);
+        DaoService.Instance.UpdateLatestScoreOfAUser(uid, score);
+        HandleSetGameOverDataPanel();
     }
+
+    private void HandleSetGameOverDataPanel()
+    {
+        Text currentDistanceText = GameObject.FindGameObjectWithTag("CurrentDistance").GetComponent<Text>();
+        currentDistanceText.text = dis_long.ToString() + " m";
+        DaoService.Instance.GetHighestDistanceOfUser(scene_num, uid, highestDistance =>
+        {
+            Text highestDistanceText = GameObject.FindGameObjectWithTag("HighestDistance").GetComponent<Text>();
+            highestDistanceText.text = highestDistance.ToString() + " m";
+        });
+    }
+
 }

@@ -12,6 +12,8 @@ TagManager:
   - FreezeCircle
   - ScoreText
   - DisText
+  - HighestDistance
+  - CurrentDistance
   layers:
   - Default
   - TransparentFX

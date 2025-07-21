@@ -17,10 +17,10 @@ public class MapManager : MonoBehaviour
     {
         map1Button.onClick.AddListener(RenderMap1);
         map2Button.onClick.AddListener(RenderMap2);
-        // map3Button.onClick.AddListener(RenderMap3);
-        // map4Button.onClick.AddListener(RenderMap4);
-        // map5Button.onClick.AddListener(RenderMap5);
-        // map6Button.onClick.AddListener(RenderMap6);
+        map3Button.onClick.AddListener(RenderMap3);
+        map4Button.onClick.AddListener(RenderMap4);
+        map5Button.onClick.AddListener(RenderMap5);
+        map6Button.onClick.AddListener(RenderMap6);
 
     }
     public void Open()
