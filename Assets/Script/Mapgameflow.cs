@@ -66,7 +66,7 @@ public class Mapgameflow : MonoBehaviour
         // Setup obstacle position (different lane than brick)
         nextObstacleSpawn = nextTileSpawn;
         nextObstacleSpawn.x = obstacleLane;
-        nextObstacleSpawn.y = 0f;
+        nextObstacleSpawn.y = 0.1f;
         nextObstacleSpawn.z += 1.5f; // Offset in Z direction
 
         // Setup coin position (different lane than both brick and obstacle)

@@ -28,6 +28,7 @@ public class Player_Controller : MonoBehaviour
     private bool isGameStarted = false;
     private int score = 0;
     private int dis_long = 0;
+    private int[] scoreRequire;
     private Vector3 startPos;
     private float originalSpeed;
     [SerializeField] private float fastDuration = 3f; // Thời gian chạy nhanh (giây)
@@ -58,6 +59,7 @@ public class Player_Controller : MonoBehaviour
 
     void Start()
     {
+        scoreRequire = new int[] { 100, 150, 200, 100, 150, 200 };
         startPos = transform.position;
         controller = GetComponent<CharacterController>();
         baseSpeed = minForwardSpeed;
@@ -77,6 +79,7 @@ public class Player_Controller : MonoBehaviour
         {
             GameObject obj = GameObject.FindGameObjectWithTag("ScoreText");
             if (obj != null) scoreText = obj.GetComponent<Text>();
+            Debug.Log("Đã có score text");
         }
 
         if (disText == null)
