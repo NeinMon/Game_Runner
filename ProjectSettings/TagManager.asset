@@ -10,6 +10,8 @@ TagManager:
   - Time
   - Invisible
   - FreezeCircle
+  - ScoreText
+  - DisText
   layers:
   - Default
   - TransparentFX
@@ -19,8 +21,8 @@ TagManager:
   - UI
   - Car
   - cmm
-  - 
-  - 
+  - ScoreText
+  - DisText
   - 
   - 
   - 

@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Firebase.Auth;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,14 +23,19 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float gravity = -5f; // Trọng lực, có thể chỉnh trong Inspector
     [SerializeField] private GameObject restartPanel;
     [SerializeField] private GameObject playPanel;
+    [SerializeField] private GameObject wholeUIPanel;
+    [SerializeField] private GameObject pausePanel;
     private bool isGameStarted = false;
     private int score = 0;
+    private int dis_long = 0;
+    private Vector3 startPos;
     private float originalSpeed;
     [SerializeField] private float fastDuration = 3f; // Thời gian chạy nhanh (giây)
     [SerializeField] private float slowDuration = 3f; // Thời gian chạy chậm (giây)
     [SerializeField] private float fastMultiplier = 2f;
     [SerializeField] private float slowMultiplier = 0.5f;
-    [SerializeField] private Text scoreText;
+    private Text scoreText;
+    private Text disText;
     [SerializeField] private float minForwardSpeed = 1f;
     [SerializeField] private float maxForwardSpeed = 4f;
     [SerializeField] private float speedIncreaseRate = 0.05f;
@@ -51,6 +58,7 @@ public class Player_Controller : MonoBehaviour
 
     void Start()
     {
+        startPos = transform.position;
         controller = GetComponent<CharacterController>();
         baseSpeed = minForwardSpeed;
         forwardSpeed = minForwardSpeed;
@@ -65,8 +73,24 @@ public class Player_Controller : MonoBehaviour
         {
             player_Animation.SetFloat("is_running", 0.0f); // Set trạng thái idle
         }
+        if (scoreText == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag("ScoreText");
+            if (obj != null) scoreText = obj.GetComponent<Text>();
+        }
+
+        if (disText == null)
+        {
+            GameObject obj = GameObject.FindGameObjectWithTag("DisText");
+            if (obj != null) disText = obj.GetComponent<Text>();
+        }
+
+
         if (scoreText != null)
-            scoreText.text = "Score: 0";
+            scoreText.text = "0";
+        if (disText != null)
+            disText.text = "0 m";
+
         currentLanePosition = transform.position;
         currentLaneOffset = 0f;
         renderers = GetComponentsInChildren<Renderer>();
@@ -76,6 +100,23 @@ public class Player_Controller : MonoBehaviour
 
     void Update()
     {
+        dis_long = (int)Vector3.Distance(startPos, transform.position);
+        if (disText != null)
+            disText.text = dis_long + "m";
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            if (!isGameStarted) return;
+
+            if (Time.timeScale > 0f)
+            {
+                PauseGame();
+            }
+            else
+            {
+                ResumeGame();
+            }
+            return; // Ngăn các xử lý khác khi đang pause
+        }
         if (!isGameStarted) return;
         // Tăng baseSpeed dần đều
         if (baseSpeed < maxForwardSpeed)
@@ -194,7 +235,8 @@ public class Player_Controller : MonoBehaviour
                 if (player_Animation != null)
                     player_Animation.SetFloat("is_running", 0.0f); // Chuyển về idle
                 isGameStarted = false; // Dừng toàn bộ gameplay
-                // Dừng game nếu muốn: Time.timeScale = 0;
+                Debug.Log("CHUẨN BỊ LƯU DATA");
+                HandleSaveProgress();
             }
             // Nếu va chạm phía sau xe hoặc từ trên xuống, không làm gì cả
         }
@@ -207,8 +249,7 @@ public class Player_Controller : MonoBehaviour
             score++;
             Destroy(other.gameObject);
             if (scoreText != null)
-                scoreText.text = "Score: " + score;
-            // TODO: cập nhật UI điểm số nếu có
+                scoreText.text = "" + score;
         }
         else if (other.CompareTag("Thunder"))
         {
@@ -273,8 +314,8 @@ public class Player_Controller : MonoBehaviour
     public void PlayGame()
     {
         isGameStarted = true;
-        if (playPanel != null)
-            playPanel.SetActive(false);
+        CloseAllPanels();
+        wholeUIPanel.SetActive(true);
         if (player_Animation != null)
         {
             player_Animation.SetFloat("is_running", 1.0f); // Set trạng thái chạy khi bắt đầu game
@@ -283,6 +324,72 @@ public class Player_Controller : MonoBehaviour
 
     public void RestartGame()
     {
+        CloseAllPanels();
+        playPanel.SetActive(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        CloseAllPanels();
+        SceneManager.LoadScene("MainMenu");
+    }
+
+    public void PauseGame()
+    {
+        if (!isGameStarted) return;
+        Time.timeScale = 0f; // Dừng thời gian
+        CloseAllPanels();
+        pausePanel.SetActive(true);
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f; // Tiếp tục thời gian
+        CloseAllPanels();
+        wholeUIPanel.SetActive(true);
+    }
+
+    private void CloseAllPanels()
+    {
+        wholeUIPanel.SetActive(false);
+        pausePanel.SetActive(false);
+        restartPanel.SetActive(false);
+        playPanel.SetActive(false);
+    }
+
+
+    private int GetSceneNumber()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+
+        if (sceneName.StartsWith("map"))
+        {
+            string mapNumberStr = sceneName.Substring(3);
+            int mapNumber = int.Parse(mapNumberStr);
+            return mapNumber;
+        }
+        return 0;
+    }
+
+    private void HandleSaveProgress()
+    {
+        var authService = AuthService.Instance;
+        if (authService == null)
+        {
+            Debug.LogWarning("authService is null (chưa đăng nhập?)");
+            return;
+        }
+        FirebaseUser user = authService.GetUser();
+        if (user == null)
+        {
+            Debug.LogWarning("User is null (chưa đăng nhập?)");
+            return;
+        }
+        String uid = user?.UserId;
+        String displayName = user?.DisplayName;
+        Debug.Log(uid.ToString());
+        if (uid == null) return;
+        DaoService.Instance.SaveProgressForUser(GetSceneNumber(), uid, displayName, dis_long);
     }
 }

@@ -14,11 +14,11 @@ public class Mapcamemove : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         currentSpeed = initialSpeed;
-        
+
         if (rb != null)
         {
             rb.linearVelocity = new Vector3(0, 0, currentSpeed);
-            
+
             // Start the coroutine to increase speed every 15 seconds
             StartCoroutine(IncreaseSpeedOverTime());
         }
@@ -31,9 +31,9 @@ public class Mapcamemove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
-    
+
     // Coroutine to increase speed periodically
     IEnumerator IncreaseSpeedOverTime()
     {
@@ -41,10 +41,10 @@ public class Mapcamemove : MonoBehaviour
         {
             // Wait for the specified interval
             yield return new WaitForSeconds(speedIncreaseInterval);
-            
+
             // Increase the speed
             currentSpeed += speedIncreaseAmount;
-            
+
             // Apply the new speed if we have a Rigidbody
             if (rb != null)
             {

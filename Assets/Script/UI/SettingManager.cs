@@ -17,8 +17,7 @@ public class SettingManager : MonoBehaviour
     public Text displayNameText;
 
     [Header("Manager")]
-    public UserManager userManager;
-
+    private AuthService authService => AuthService.Instance;
 
     public void Start()
     {
@@ -41,7 +40,7 @@ public class SettingManager : MonoBehaviour
 
     public void HandleLoginOrRegister()
     {
-        userManager.LoginOrRegister(emailInput.text, passwordInput.text, displayNameInput.text, (user) =>
+        authService.LoginOrRegister(emailInput.text, passwordInput.text, displayNameInput.text, (user) =>
         {
             SetInputsAndButton();
             SetDisplayName();
@@ -52,14 +51,14 @@ public class SettingManager : MonoBehaviour
 
     public void HandleLogout()
     {
-        userManager.Logout();
+        authService.Logout();
         SetInputsAndButton();
         SetDisplayName();
     }
 
     public void SetDisplayName()
     {
-        var user = userManager.GetUser();
+        var user = authService.GetUser();
         if (user != null)
         {
             displayNameText.text = user.DisplayName ?? "<ANONYMOUS>";
@@ -72,7 +71,7 @@ public class SettingManager : MonoBehaviour
     }
     public void SetInputsAndButton()
     {
-        bool isSignedIn = userManager.IsSignedIn();
+        bool isSignedIn = authService.IsSignedIn();
         emailInput.text = "";
         passwordInput.text = "";
         displayNameInput.text = "";

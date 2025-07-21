@@ -18,7 +18,7 @@ public class Mapgameflow : MonoBehaviour
 
     private Vector3 nextPowerUpSpawn;
     private Vector3 nextInvisibleSpawn;
-    
+
     private int tileCounter = 0; // Counter to track tiles spawned
     public int powerUpFrequency = 3; // Spawn power-up every X tiles
 
@@ -36,14 +36,14 @@ public class Mapgameflow : MonoBehaviour
     IEnumerator spawnTile()
     {
         yield return new WaitForSeconds(1);
-        
+
         // Increment tile counter
         tileCounter++;
-        
+
         // Choose distinct lanes for each object type
         int[] lanes = { -1, 0, 1 };
         System.Random rnd = new System.Random();
-        
+
         // Fisher-Yates shuffle to randomize lanes
         for (int i = lanes.Length - 1; i > 0; i--)
         {
@@ -52,7 +52,7 @@ public class Mapgameflow : MonoBehaviour
             lanes[i] = lanes[j];
             lanes[j] = temp;
         }
-        
+
         // Assign shuffled lanes to objects
         int brickLane = lanes[0];
         int obstacleLane = lanes[1];
@@ -90,9 +90,6 @@ public class Mapgameflow : MonoBehaviour
 
         // Instantiate tiles without destruction
         GameObject tile1 = Instantiate(tileObj, nextTileSpawn, tileObj.rotation).gameObject;
-
-        // Instantiate bricks without destruction
-        GameObject brick = Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation).gameObject;
 
         // Instantiate new obstacle without destruction
         if (obstacleObj != null)
