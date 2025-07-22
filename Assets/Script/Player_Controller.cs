@@ -26,7 +26,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private GameObject playPanel;
     [SerializeField] private GameObject wholeUIPanel;
     [SerializeField] private GameObject pausePanel;
-    [SerializeField] private GameObject popUp;
+     private PopUpEffect popUp;
     private bool isGameStarted = false;
     private int score = 0;
     private int dis_long = 0;
@@ -58,11 +58,17 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private ParticleSystem invisibleEffect; // Hiệu ứng khi tàng hình
     [SerializeField] private ParticleSystem thunderEffect; // Hiệu ứng khi ăn Thunder
     [SerializeField] private ParticleSystem timeEffect;    // Hiệu ứng khi ăn Time
+    [SerializeField] private ParticleSystem freezeEffect; // Hiệu ứng băng
+
+    private bool isFreezing = false; // Cờ kiểm soát hiệu ứng freeze
+
 
     private bool completed;
     private string uid;
     private string displayName;
     private int scene_num;
+
+
 
     void Start()
     {
@@ -129,6 +135,16 @@ public class Player_Controller : MonoBehaviour
         {
             completed = latest_completed_status;
         });
+        PopUpEffect[] allObjects = Resources.FindObjectsOfTypeAll<PopUpEffect>();
+        foreach (PopUpEffect obj in allObjects)
+        {
+            if (obj.CompareTag("UnlockNewMap"))
+            {
+                popUp = obj;
+                break;
+            }
+        }
+
     }
 
     void Update()
@@ -185,8 +201,9 @@ public class Player_Controller : MonoBehaviour
         // UI for pop up
         if (completed == false && (score >= scoreRequire[scene_num - 1]))
         {
+            Debug.Log("ĐÃ HOÀN THÀNH MAP " + scene_num + " VỚI ĐIỂM: " + score);
             completed = true;
-            popUp.GetComponent<PopUpEffect>().StartFade();
+            popUp.StartFade();
         }
     }
 
@@ -264,7 +281,7 @@ public class Player_Controller : MonoBehaviour
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (isInvisible) return; // Nếu tàng hình thì bỏ qua va chạm
-        if (hit.gameObject.CompareTag("Car"))
+        if (hit.gameObject.CompareTag("Car") || hit.gameObject.CompareTag("HighObstacle"))
         {
             Vector3 normal = hit.normal.normalized;
             // Chỉ xử lý nếu va chạm phía trước hoặc hai bên xe, không phải từ trên xuống và không phải phía sau
@@ -313,6 +330,20 @@ public class Player_Controller : MonoBehaviour
             Destroy(other.gameObject);
             SoundManager.Instance.PlayPowerUpSFX();
         }
+        else if (other.CompareTag("FreezeCircle"))
+        {
+            if (!isFreezing)
+            {
+                isFreezing = true;
+                if (freezeEffect != null)
+                {
+                    freezeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    freezeEffect.Play();
+                    StartCoroutine(StopFreezeEffectAfterDuration(2f));
+                }
+                StartCoroutine(FreezeAndRestartCoroutine());
+            }
+        }
     }
 
     private System.Collections.IEnumerator SpeedBoost()
@@ -351,12 +382,34 @@ public class Player_Controller : MonoBehaviour
             invisibleEffect.Play();
         }
         Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Car"), true);
+        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Obstacle"), true);
         yield return new WaitForSeconds(invisibleDuration);
         isInvisible = false;
         if (invisibleEffect != null) invisibleEffect.Stop();
         Debug.Log("[InvisibleCoroutine] Hết tàng hình");
         Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Car"), false);
+        Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Obstacle"), false);
     }
+
+    private System.Collections.IEnumerator StopFreezeEffectAfterDuration(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        if (freezeEffect != null)
+            freezeEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    private System.Collections.IEnumerator FreezeAndRestartCoroutine()
+    {
+        isGameStarted = false;
+        if (player_Animation != null)
+            player_Animation.SetFloat("is_running", 0.0f);
+        yield return new WaitForSeconds(2f); // Đợi hiệu ứng băng 2 giây
+        if (restartPanel != null)
+            restartPanel.SetActive(true);
+        isFreezing = false; // Reset cờ cho lần sau
+    }
+
+
 
     public void PlayGame()
     {

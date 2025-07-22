@@ -14,21 +14,33 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/map1.unity
     guid: ffce81cc404266d4fb72e1a46d810a5c
-  - enabled: 1
-    path: Assets/Scenes/map2.unity
+  - enabled: 0
+    path: Assets/Prefabs/Scenes/map2.unity
     guid: d1bead1eb868aa0429b2dd435383a2c1
   - enabled: 1
-    path: Assets/Scenes/map3.unity
+    path: Assets/Scenes/map2.unity
+    guid: 92b19d32000fb5f4682b53c68a45e1b2
+  - enabled: 0
+    path: Assets/Prefabs/Scenes/map3.unity
     guid: b6545da21783bd948bb20981bf0eadc8
+  - enabled: 1
+    path: Assets/Scenes/map3.unity
+    guid: f86eccb9690747d42979f56ceccf90ad
   - enabled: 1
     path: Assets/Scenes/map4.unity
     guid: d98e7576d170e6a4e943b5724ccc9091
-  - enabled: 1
-    path: Assets/Scenes/map5.unity
+  - enabled: 0
+    path: Assets/Prefabs/Scenes/map5.unity
     guid: b71d3a7a01ecbbf43b5da6d94cb48b05
   - enabled: 1
-    path: Assets/Scenes/map6.unity
+    path: Assets/Scenes/map5.unity
+    guid: 443c675237ce1b04eabf4a127622a914
+  - enabled: 0
+    path: Assets/Prefabs/Scenes/map6.unity
     guid: c91655fef5408304b8cb68e394806292
+  - enabled: 1
+    path: Assets/Scenes/map6.unity
+    guid: d109fd47b70646e419b06d393adf20aa
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

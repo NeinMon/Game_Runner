@@ -526,6 +526,7 @@ MonoBehaviour:
   freezeCircleObj: {fileID: 0}
   highObstacleObj: {fileID: 0}
   powerUpFrequency: 3
+  currentArcRate: 0.5
 --- !u!1 &82179060
 GameObject:
   m_ObjectHideFlags: 0
@@ -82453,9 +82454,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 103849097}
     m_Modifications:
+    - target: {fileID: 1966813494716840993, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
+      propertyPath: m_TagString
+      value: Car
+      objectReference: {fileID: 0}
     - target: {fileID: 2373259052207255476, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
       propertyPath: m_Name
       value: box
+      objectReference: {fileID: 0}
+    - target: {fileID: 4538528883433169938, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
+      propertyPath: m_TagString
+      value: Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 5265549467284444041, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
+      propertyPath: m_TagString
+      value: Car
       objectReference: {fileID: 0}
     - target: {fileID: 5912314069480421316, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
       propertyPath: m_LocalPosition.x
@@ -82496,6 +82509,14 @@ PrefabInstance:
     - target: {fileID: 5912314069480421316, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7486559976343957108, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
+      propertyPath: m_TagString
+      value: Car
+      objectReference: {fileID: 0}
+    - target: {fileID: 7762703785756325850, guid: 29deeb48c8f96e0488347a3f67ad1b96, type: 3}
+      propertyPath: m_TagString
+      value: Car
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -110590,7 +110611,7 @@ GameObject:
   - component: {fileID: 2098460501}
   m_Layer: 5
   m_Name: UnlockNewMap
-  m_TagString: Untagged
+  m_TagString: UnlockNewMap
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -110867,7 +110888,6 @@ MonoBehaviour:
   playPanel: {fileID: 8650348747321617079}
   wholeUIPanel: {fileID: 2408628173449986921}
   pausePanel: {fileID: 4623995375535441876}
-  popUp: {fileID: 2098460496}
   fastDuration: 3
   slowDuration: 3
   fastMultiplier: 2
@@ -110880,6 +110900,7 @@ MonoBehaviour:
   invisibleEffect: {fileID: 1298083408}
   thunderEffect: {fileID: 775227394}
   timeEffect: {fileID: 1946489478}
+  freezeEffect: {fileID: 0}
 --- !u!54 &2125243088
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -116364,6 +116385,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 2038251715222356343, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
+    - {fileID: 260746139228979997, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
+    - {fileID: 1422701805044772473, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
+    - {fileID: 349003074057629935, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
+    - {fileID: 8242874739002238873, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 5114002584155627935, guid: 4009760b79ac4e14abf55f372cc5b489, type: 3}
       insertIndex: -1
