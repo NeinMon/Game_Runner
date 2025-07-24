@@ -93,7 +93,7 @@ public class Mapgameflow : MonoBehaviour
         }
 
         // Spawn Car Obstacle và Obstacle
-        bool shouldSpawnCar = carObstacleObj != null && ShouldSpawnCarObstacles();
+        bool shouldSpawnCar = carObstacleObj != null;
         bool shouldSpawnObstacle = obstacleObj != null && ShouldSpawnObstacles();
         
         if (shouldSpawnCar && shouldSpawnObstacle)
@@ -227,15 +227,6 @@ public class Mapgameflow : MonoBehaviour
     {
         // Màn 3, 5, 6 có freeze circles
         return currentLevel == 3 || currentLevel == 5 || currentLevel == 6;
-    }
-    
-    // Kiểm tra xem có nên spawn car obstacles không
-    private bool ShouldSpawnCarObstacles()
-    {
-        // Tất cả màn đều có car obstacles
-        // Màn 1-3: xe đứng yên (không có script chạy)
-        // Màn 4-6: xe chạy về phía nhân vật
-        return true;
     }
     
     // Kiểm tra xem có nên spawn high obstacles không
