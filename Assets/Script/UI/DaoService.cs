@@ -52,7 +52,7 @@ public class DaoService : MonoBehaviour
                      }
                      else
                      {
-                         Debug.Log($"Đã lưu thành công. Distance mới {(newDistance > currentDistance ? $"được cập nhật: {newDistance}" : "không thay đổi")}. Completed: {completed}");
+                         Debug.Log("Đã lưu thành công.");
                      }
                  });
         });
@@ -223,7 +223,6 @@ public class DaoService : MonoBehaviour
 
     public void GetMusicAndSFXVolumeSettings(string uid, Action<Dictionary<string, float>> onResult)
     {
-        if (dbRef == null) Debug.Log("DBREF NULL NE");
         dbRef.Child("user-info").Child(uid).GetValueAsync()
             .ContinueWithOnMainThread(task =>
             {

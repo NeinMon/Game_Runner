@@ -93,7 +93,6 @@ public class SoundManager : MonoBehaviour
 
     public void LoadMusicVolumeAndSFXVolume(Action onCompleted = null)
     {
-        Debug.Log("Hi HERE");
         string uid = AuthService.Instance.GetUser()?.UserId;
         if (string.IsNullOrEmpty(uid))
         {
