@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
 {
+
+    private List<int> completedMaps = new List<int>();
 
     public Button map1Button;
     public Button map2Button;
@@ -12,7 +15,9 @@ public class MapManager : MonoBehaviour
     public Button map5Button;
     public Button map6Button;
 
+    public Text scoreText;
 
+    public GameObject scoreZone;
     public void Start()
     {
         map1Button.onClick.AddListener(RenderMap1);
@@ -21,11 +26,32 @@ public class MapManager : MonoBehaviour
         map4Button.onClick.AddListener(RenderMap4);
         map5Button.onClick.AddListener(RenderMap5);
         map6Button.onClick.AddListener(RenderMap6);
-
+        scoreText.text = "0";
     }
     public void Open()
     {
-        gameObject.SetActive(true);
+        string uid = AuthService.Instance.GetUser()?.UserId;
+        if (string.IsNullOrEmpty(uid))
+        {
+            Debug.LogWarning("User not logged in. Unlocking only map1.");
+            completedMaps = new List<int> { 1 };
+            HandleSetInteractableMap();
+            gameObject.SetActive(true);
+            scoreZone.SetActive(false);
+            return;
+        }
+
+        DaoService.Instance.GetLatestScoreOfUser(uid, total_score =>
+        {
+            scoreText.text = total_score.ToString();
+            scoreZone.SetActive(true);
+        });
+        DaoService.Instance.GetCompletedProgressOfUserByUID(uid, maps_retrieved =>
+        {
+            completedMaps = maps_retrieved;
+            HandleSetInteractableMap();
+            gameObject.SetActive(true);
+        });
     }
 
     public void Close()
@@ -58,4 +84,32 @@ public class MapManager : MonoBehaviour
     {
         SceneManager.LoadScene("map6");
     }
+
+    private void HandleSetInteractableMap()
+    {
+        SetCannotInteractableMaps();
+        foreach (int index in completedMaps)
+        {
+            switch (index)
+            {
+                case 1: map1Button.interactable = true; break;
+                case 2: map2Button.interactable = true; break;
+                case 3: map3Button.interactable = true; break;
+                case 4: map4Button.interactable = true; break;
+                case 5: map5Button.interactable = true; break;
+                case 6: map6Button.interactable = true; break;
+            }
+        }
+    }
+
+    private void SetCannotInteractableMaps()
+    {
+        map1Button.interactable = true;
+        map2Button.interactable = false;
+        map3Button.interactable = false;
+        map4Button.interactable = false;
+        map5Button.interactable = false;
+        map6Button.interactable = false;
+    }
+
 }

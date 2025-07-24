@@ -174,6 +174,67 @@ public class DaoService : MonoBehaviour
         });
     }
 
+    public void AddCompletedMapToProgress(string uid, int map_num)
+    {
+        int nextMap = map_num + 1;
+
+        Dictionary<string, object> resultData = new Dictionary<string, object>
+        {
+            { map_num.ToString(), "COMPLETED" },
+            { nextMap.ToString(), "COMPLETED" }
+        };
+
+
+        dbRef.Child("user-info").Child(uid).Child("progress").UpdateChildrenAsync(resultData)
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsCompletedSuccessfully)
+                {
+                    Debug.Log("Progress updated successfully.");
+                }
+                else
+                {
+                    Debug.LogError("Failed to update progress: " + task.Exception);
+                }
+            });
+    }
+
+    public void GetCompletedProgressOfUserByUID(string uid, Action<List<int>> onResult)
+    {
+        DatabaseReference progressRef = dbRef.Child("user-info").Child(uid).Child("progress");
+
+        progressRef.GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Failed to get progress: " + task.Exception);
+                onResult?.Invoke(new List<int>());
+                return;
+            }
+
+            if (task.IsCompletedSuccessfully)
+            {
+                DataSnapshot snapshot = task.Result;
+                List<int> completedMaps = new List<int>();
+
+                if (snapshot.Exists)
+                {
+                    foreach (var child in snapshot.Children)
+                    {
+                        if (int.TryParse(child.Key, out int mapIndex))
+                        {
+                            completedMaps.Add(mapIndex);
+                        }
+                    }
+                }
+
+                onResult?.Invoke(completedMaps);
+            }
+        });
+    }
+
+
+
     public void GetMusicAndSFXVolumeSettings(string uid, Action<Dictionary<string, float>> onResult)
     {
         dbRef.Child("user-info").Child(uid).GetValueAsync()

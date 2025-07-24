@@ -26,7 +26,7 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private GameObject playPanel;
     [SerializeField] private GameObject wholeUIPanel;
     [SerializeField] private GameObject pausePanel;
-     private PopUpEffect popUp;
+    private PopUpEffect popUp;
     private bool isGameStarted = false;
     private int score = 0;
     private int dis_long = 0;
@@ -112,7 +112,6 @@ public class Player_Controller : MonoBehaviour
         currentLaneOffset = 0f;
         renderers = GetComponentsInChildren<Renderer>();
         playerCollider = GetComponent<Collider>();
-        // Đã xóa dòng invisibleEffect.Play() test
 
         scene_num = GetSceneNumber();
         var authService = AuthService.Instance;
@@ -164,10 +163,9 @@ public class Player_Controller : MonoBehaviour
             {
                 ResumeGame();
             }
-            return; // Ngăn các xử lý khác khi đang pause
+            return;
         }
         if (!isGameStarted) return;
-        // Tăng baseSpeed dần đều
         if (baseSpeed < maxForwardSpeed)
         {
             baseSpeed += speedIncreaseRate * Time.deltaTime;
@@ -177,17 +175,13 @@ public class Player_Controller : MonoBehaviour
         forwardSpeed = baseSpeed * speedMultiplier;
         HandleLaneSwitching();
         HandleJump();
-        // Làm mượt chuyển làn trên trục X
         float targetLaneOffset = (targetLane - 1) * laneDistance;
         currentLaneOffset = Mathf.SmoothDamp(currentLaneOffset, targetLaneOffset, ref laneOffsetVelocity, laneSmoothTime);
-        // Tính toán vector di chuyển tổng hợp cho cả X và Z
         Vector3 move = Vector3.zero;
         move.x = currentLaneOffset - transform.position.x;
         move.z = forwardSpeed * Time.deltaTime;
-        move.y = 0; // Không thay đổi trục Y ở đây
+        move.y = 0;
         controller.Move(move);
-        // Không đặt lại transform.position thủ công nữa
-        // Xử lý queue chuyển làn liên tục
         if (Mathf.Abs(currentLaneOffset - targetLaneOffset) < 0.01f && laneChangeQueue.Count > 0)
         {
             int nextDir = laneChangeQueue.Dequeue();
@@ -198,10 +192,8 @@ public class Player_Controller : MonoBehaviour
             }
         }
 
-        // UI for pop up
         if (completed == false && (score >= scoreRequire[scene_num - 1]))
         {
-            Debug.Log("ĐÃ HOÀN THÀNH MAP " + scene_num + " VỚI ĐIỂM: " + score);
             completed = true;
             popUp.StartFade();
         }
@@ -475,11 +467,14 @@ public class Player_Controller : MonoBehaviour
     private void HandleSaveProgressAndScore()
     {
 
-        Debug.Log("REQUIRE SCORE FOR THIS SCENE: " + scoreRequire[scene_num - 1]);
         if (uid == null) return;
         Debug.Log("CURRENT COMPLETED STATUS: " + completed.ToString());
         DaoService.Instance.SaveProgressForUser(scene_num, uid, displayName, dis_long, completed);
         DaoService.Instance.UpdateLatestScoreOfAUser(uid, score);
+        if (completed == true)
+        {
+            DaoService.Instance.AddCompletedMapToProgress(uid, scene_num);
+        }
         HandleSetGameOverDataPanel();
     }
 
