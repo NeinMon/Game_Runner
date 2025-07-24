@@ -1,13 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Mapgameflow : MonoBehaviour
 {
     public Transform tileObj;
     private Vector3 nextTileSpawn;
-    public Transform bricksObj;
-    private Vector3 nextBrickSpawn;
     public Transform obstacleObj;
     private Vector3 nextObstacleSpawn;
     public Transform coinObj;
@@ -19,6 +18,12 @@ public class Mapgameflow : MonoBehaviour
     private Vector3 nextFreezeCircleSpawn;
     public Transform highObstacleObj;
     private Vector3 nextHighObstacleSpawn;
+    
+    // Car obstacles
+    public Transform carObstacleObj;
+    private Vector3 nextCarObstacleSpawn;
+    
+    private int currentLevel = 1;
 
     private Vector3 nextPowerUpSpawn;
     private Vector3 nextInvisibleSpawn;
@@ -30,8 +35,24 @@ public class Mapgameflow : MonoBehaviour
 
     void Start()
     {
+        // Lấy level hiện tại từ tên scene
+        currentLevel = GetCurrentLevel();
         nextTileSpawn.z = 18;
         StartCoroutine(spawnTile());
+    }
+    
+    private int GetCurrentLevel()
+    {
+        string sceneName = SceneManager.GetActiveScene().name;
+        if (sceneName.StartsWith("map"))
+        {
+            string mapNumberStr = sceneName.Substring(3);
+            if (int.TryParse(mapNumberStr, out int mapNumber))
+            {
+                return mapNumber;
+            }
+        }
+        return 1; // Default to level 1
     }
 
     IEnumerator spawnTile()
@@ -53,17 +74,8 @@ public class Mapgameflow : MonoBehaviour
         int obstacleLane = lanes[1];
         int coinLane = lanes[2];
 
-        // Spawn Brick (nếu có)
-        if (bricksObj != null)
-        {
-            nextBrickSpawn = nextTileSpawn;
-            nextBrickSpawn.x = brickLane;
-            nextBrickSpawn.y = 0f;
-            Instantiate(bricksObj, nextBrickSpawn, bricksObj.rotation);
-        }
-
-        // Spawn High Obstacle (nếu có)
-        if (highObstacleObj != null)
+        // Spawn High Obstacle (nếu có và level cho phép)
+        if (highObstacleObj != null && ShouldSpawnHighObstacles())
         {
             nextHighObstacleSpawn = nextTileSpawn;
             nextHighObstacleSpawn.x = obstacleLane;
@@ -71,8 +83,8 @@ public class Mapgameflow : MonoBehaviour
             Instantiate(highObstacleObj, nextHighObstacleSpawn, highObstacleObj.rotation);
         }
 
-        // Spawn Freeze Circle (nếu có)
-        if (freezeCircleObj != null)
+        // Spawn Freeze Circle (nếu có và level cho phép)
+        if (freezeCircleObj != null && ShouldSpawnFreezeCircles())
         {
             nextFreezeCircleSpawn = nextTileSpawn;
             nextFreezeCircleSpawn.x = brickLane;
@@ -80,8 +92,39 @@ public class Mapgameflow : MonoBehaviour
             Instantiate(freezeCircleObj, nextFreezeCircleSpawn, freezeCircleObj.rotation);
         }
 
-        // Spawn Obstacle (nếu có)
-        if (obstacleObj != null)
+        // Spawn Car Obstacle và Obstacle
+        bool shouldSpawnCar = carObstacleObj != null && ShouldSpawnCarObstacles();
+        bool shouldSpawnObstacle = obstacleObj != null && ShouldSpawnObstacles();
+        
+        if (shouldSpawnCar && shouldSpawnObstacle)
+        {
+            // Nếu cần spawn cả 2, spawn random 1 trong 2
+            if (Random.value < 0.5f)
+            {
+                nextCarObstacleSpawn = nextTileSpawn;
+                nextCarObstacleSpawn.x = obstacleLane;
+                nextCarObstacleSpawn.y = 0.1f;
+                nextCarObstacleSpawn.z += 2.0f;
+                Instantiate(carObstacleObj, nextCarObstacleSpawn, carObstacleObj.rotation);
+            }
+            else
+            {
+                nextObstacleSpawn = nextTileSpawn;
+                nextObstacleSpawn.x = obstacleLane;
+                nextObstacleSpawn.y = 0f;
+                nextObstacleSpawn.z += 1.5f;
+                Instantiate(obstacleObj, nextObstacleSpawn, obstacleObj.rotation);
+            }
+        }
+        else if (shouldSpawnCar)
+        {
+            nextCarObstacleSpawn = nextTileSpawn;
+            nextCarObstacleSpawn.x = obstacleLane;
+            nextCarObstacleSpawn.y = 0.1f;
+            nextCarObstacleSpawn.z += 2.0f;
+            Instantiate(carObstacleObj, nextCarObstacleSpawn, carObstacleObj.rotation);
+        }
+        else if (shouldSpawnObstacle)
         {
             nextObstacleSpawn = nextTileSpawn;
             nextObstacleSpawn.x = obstacleLane;
@@ -93,48 +136,37 @@ public class Mapgameflow : MonoBehaviour
         // Spawn Coins
         if (coinObj != null)
         {
-            if (Random.value < currentArcRate)
+            // Kiểm tra xem có nên spawn coin vòng cung không (màn 3, 5, 6)
+            bool shouldSpawnArcCoins = (currentLevel == 3 || currentLevel == 5 || currentLevel == 6);
+            
+            if (shouldSpawnArcCoins && Random.value < currentArcRate)
             {
-                // Coin vòng cung
+                // Coin vòng cung (tạo vòng cung với freezeCircleObj làm trung tâm)
                 Vector3 coinPosition = nextTileSpawn;
-                coinPosition.x = coinLane;
+                coinPosition.x = brickLane; // Tất cả coin đều ở lane freezeCircleObj
                 float jumpForce = 2.1f;
                 float gravity = -5f;
                 float tMax = -2 * jumpForce / gravity;
-                float dz = 0.7f;
+
+                // Tạo vòng cung với freezeCircleObj làm trung tâm
+                float[] zOffsets = { -1f, -0.5f, 0f, 0.5f, 1f }; // Coin 1,2,3,4,5
 
                 for (int i = 0; i < 5; i++)
                 {
-                    Vector3 spawnPos = coinPosition;
+                    Vector3 spawnPos = nextTileSpawn;
                     float t = i / 4.0f * tMax;
                     float y = jumpForce * t + 0.5f * gravity * t * t;
+                    
+                    spawnPos.x = brickLane; // Cùng lane với freezeCircleObj
                     spawnPos.y = 0.2f + y;
+                    spawnPos.z = nextTileSpawn.z + zOffsets[i]; // Coin 3 ở z=0 (trên freezeCircleObj)
 
                     Instantiate(coinObj, spawnPos, coinObj.rotation);
-
-                    // Spawn vật cản dưới coin thứ 3 (nếu prefab tồn tại)
-                    if (i == 2)
-                    {
-                        Vector3 belowCoin = spawnPos;
-
-                        if (bricksObj != null && (Random.value < 0.5f || obstacleObj == null))
-                        {
-                            belowCoin.y = 0f;
-                            Instantiate(bricksObj, belowCoin, bricksObj.rotation);
-                        }
-                        else if (obstacleObj != null)
-                        {
-                            belowCoin.y = 0.1f;
-                            Instantiate(obstacleObj, belowCoin, obstacleObj.rotation);
-                        }
-                    }
-
-                    coinPosition.z += dz;
                 }
             }
             else
             {
-                // Coin thẳng hàng
+                // Coin thẳng hàng (cho tất cả màn)
                 Vector3 coinPos = nextTileSpawn;
                 coinPos.x = coinLane;
                 coinPos.y = 0.2f;
@@ -147,7 +179,7 @@ public class Mapgameflow : MonoBehaviour
             }
         }
 
-        // Power-ups
+        // Power-ups (cho tất cả các màn)
         if (tileCounter % powerUpFrequency == 0)
         {
             float rand = Random.value;
@@ -181,5 +213,35 @@ public class Mapgameflow : MonoBehaviour
         nextTileSpawn.z += 3;
 
         StartCoroutine(spawnTile());
+    }
+    
+    // Kiểm tra xem có nên spawn obstacles không
+    private bool ShouldSpawnObstacles()
+    {
+        // Màn 2, 3, 6 có obstacles
+        return currentLevel == 2 || currentLevel == 3 || currentLevel == 6;
+    }
+    
+    // Kiểm tra xem có nên spawn freeze circles không
+    private bool ShouldSpawnFreezeCircles()
+    {
+        // Màn 3, 5, 6 có freeze circles
+        return currentLevel == 3 || currentLevel == 5 || currentLevel == 6;
+    }
+    
+    // Kiểm tra xem có nên spawn car obstacles không
+    private bool ShouldSpawnCarObstacles()
+    {
+        // Tất cả màn đều có car obstacles
+        // Màn 1-3: xe đứng yên (không có script chạy)
+        // Màn 4-6: xe chạy về phía nhân vật
+        return true;
+    }
+    
+    // Kiểm tra xem có nên spawn high obstacles không
+    private bool ShouldSpawnHighObstacles()
+    {
+        // Chỉ màn 6 có high obstacles
+        return currentLevel == 6;
     }
 }

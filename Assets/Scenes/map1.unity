@@ -518,13 +518,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tileObj: {fileID: 3179417920651089470}
   bricksObj: {fileID: 0}
-  obstacleObj: {fileID: 980048632}
+  obstacleObj: {fileID: 0}
   coinObj: {fileID: 1703551703}
   speedUpObj: {fileID: 1307834628}
   slowDownObj: {fileID: 1875913680}
   invisibleObj: {fileID: 550241174}
   freezeCircleObj: {fileID: 0}
   highObstacleObj: {fileID: 0}
+  carObstacleObj: {fileID: 980048632}
   powerUpFrequency: 3
   currentArcRate: 0.5
 --- !u!1 &82179060
@@ -110087,7 +110088,7 @@ MonoBehaviour:
   invisibleEffect: {fileID: 1298083408}
   thunderEffect: {fileID: 775227394}
   timeEffect: {fileID: 1946489478}
-  freezeEffect: {fileID: 0}
+  freezeEffect: {fileID: 2144132714}
 --- !u!54 &2125243088
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -3259,14 +3259,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileObj: {fileID: 754948624}
-  bricksObj: {fileID: 0}
-  obstacleObj: {fileID: 1141245448}
+  obstacleObj: {fileID: 0}
   coinObj: {fileID: 1795367308}
   speedUpObj: {fileID: 1403216299}
   slowDownObj: {fileID: 1243427146}
   invisibleObj: {fileID: 191111365}
   freezeCircleObj: {fileID: 0}
   highObstacleObj: {fileID: 0}
+  carObstacleObj: {fileID: 1141245448}
   powerUpFrequency: 3
   currentArcRate: 0.5
 --- !u!4 &436903369
