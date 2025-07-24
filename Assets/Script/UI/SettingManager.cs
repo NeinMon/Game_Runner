@@ -16,12 +16,11 @@ public class SettingManager : MonoBehaviour
     [Header("Text")]
     public Text displayNameText;
 
-    [Header("Manager")]
-    private AuthService authService => AuthService.Instance;
-
     [Header("Music & SFX Slider")]
     public Slider musicSlider;
     public Slider sfxSlider;
+
+
 
     public void Start()
     {
@@ -29,44 +28,52 @@ public class SettingManager : MonoBehaviour
         signOutButton.onClick.AddListener(HandleLogout);
         SetInputsAndButton();
         SetDisplayName();
-        LoadMusicVolumeAndSFXVolume();
+        SoundManager.Instance.LoadMusicVolumeAndSFXVolume(() =>
+        {
+            SetMusicVolumeAndSFXVolume();
+        });
     }
 
 
     public void Open()
     {
         gameObject.SetActive(true);
-        LoadMusicVolumeAndSFXVolume();
+        SoundManager.Instance.LoadMusicVolumeAndSFXVolume(() =>
+        {
+            SetMusicVolumeAndSFXVolume();
+        });
     }
 
     public void Close()
     {
-        SaveMusicVolumeAndSFXVolume();
+        SoundManager.Instance.SaveMusicVolumeAndSFXVolume();
         gameObject.SetActive(false);
     }
 
     public void HandleLoginOrRegister()
     {
-        authService.LoginOrRegister(emailInput.text, passwordInput.text, displayNameInput.text, (user) =>
+        AuthService.Instance.LoginOrRegister(emailInput.text, passwordInput.text, displayNameInput.text, (user) =>
         {
             SetInputsAndButton();
             SetDisplayName();
+            SoundManager.Instance.LoadMusicVolumeAndSFXVolume(() =>
+            {
+                SetMusicVolumeAndSFXVolume();
+            });
         });
-        LoadMusicVolumeAndSFXVolume();
     }
-
-
 
     public void HandleLogout()
     {
-        authService.Logout();
+        AuthService.Instance.Logout();
+        SoundManager.Instance.SaveMusicVolumeAndSFXVolume();
         SetInputsAndButton();
         SetDisplayName();
     }
 
     public void SetDisplayName()
     {
-        var user = authService.GetUser();
+        var user = AuthService.Instance.GetUser();
         if (user != null)
         {
             displayNameText.text = user.DisplayName ?? "<ANONYMOUS>";
@@ -79,7 +86,7 @@ public class SettingManager : MonoBehaviour
     }
     public void SetInputsAndButton()
     {
-        bool isSignedIn = authService.IsSignedIn();
+        bool isSignedIn = AuthService.Instance.IsSignedIn();
         emailInput.text = "";
         passwordInput.text = "";
         displayNameInput.text = "";
@@ -91,43 +98,6 @@ public class SettingManager : MonoBehaviour
         if (signOutButton != null) signOutButton.gameObject.SetActive(isSignedIn);
     }
 
-    private void LoadMusicVolumeAndSFXVolume()
-    {
-        string uid = authService.GetUser()?.UserId;
-        if (string.IsNullOrEmpty(uid)) return;
-
-        DaoService.Instance.GetMusicAndSFXVolumeSettings(uid, data =>
-        {
-            if (data != null)
-            {
-                float musicVol = data.ContainsKey("music-volume") ? data["music-volume"] : 0.7f;
-                float sfxVol = data.ContainsKey("sfx-volume") ? data["sfx-volume"] : 0.7f;
-
-                Debug.Log("Music Volume: " + musicVol);
-                Debug.Log("SFX Volume: " + sfxVol);
-
-                musicSlider.value = musicVol;
-                sfxSlider.value = sfxVol;
-
-                SoundManager.Instance.MusicVolume(musicVol);
-                SoundManager.Instance.SFXVolume(sfxVol);
-            }
-        });
-    }
-
-    private void SaveMusicVolumeAndSFXVolume()
-    {
-        string uid = authService.GetUser()?.UserId;
-
-        float musicVolume = musicSlider.value;
-        float sfxVolume = sfxSlider.value;
-
-        if (string.IsNullOrEmpty(uid)) return;
-        DaoService.Instance.SaveMusicAndSFXVolumeSettings(uid, musicVolume, sfxVolume, success =>
-        {
-            Debug.Log("SUCCESS STATUS: " + success.ToString());
-        });
-    }
 
 
     public void MusicVolume()
@@ -139,7 +109,12 @@ public class SettingManager : MonoBehaviour
     public void SFXVolume()
     {
         float sfxVolume = sfxSlider.value;
-        Debug.Log(sfxVolume);
         SoundManager.Instance.SFXVolume(sfxVolume);
+    }
+
+    private void SetMusicVolumeAndSFXVolume()
+    {
+        musicSlider.value = SoundManager.Instance.GetMusicVolume();
+        sfxSlider.value = SoundManager.Instance.GetSFXVolume();
     }
 }

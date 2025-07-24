@@ -1,4 +1,6 @@
 using UnityEngine;
+using System;
+using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
@@ -9,16 +11,21 @@ public class SoundManager : MonoBehaviour
     public AudioSource musicAudioSource;
     public AudioSource sfxAudioSource;
 
-    public float sfxVolume = 0.7f;
-    public float musicVolume = 0.7f;
+    private float sfxVolume = 0.7f;
+    private float musicVolume = 0.7f;
 
     public AudioClip musicClip;
     public AudioClip coinClip;
     public AudioClip powerUpClip;
     public AudioClip pressBtnClip;
+    public AudioClip freezeClip;
+    public AudioClip collideClip;
+
+
 
     void Awake()
     {
+
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -32,9 +39,11 @@ public class SoundManager : MonoBehaviour
 
     void Start()
     {
-        musicAudioSource.clip = musicClip;
-        musicAudioSource.volume = musicVolume;
-        musicAudioSource.Play();
+        LoadMusicVolumeAndSFXVolume(() =>
+        {
+            musicAudioSource.clip = musicClip;
+            musicAudioSource.Play();
+        });
     }
 
     public void MusicVolume(float newVolume)
@@ -48,27 +57,74 @@ public class SoundManager : MonoBehaviour
         sfxAudioSource.volume = newVolume;
     }
 
+    public float GetMusicVolume()
+    {
+        return musicVolume;
+    }
+    public float GetSFXVolume()
+    {
+        return sfxVolume;
+    }
+
     public void PlayCoinSFX()
     {
-        sfxAudioSource.clip = coinClip;
-        sfxAudioSource.volume = sfxVolume;
         sfxAudioSource.PlayOneShot(coinClip);
     }
 
     public void PlayPowerUpSFX()
     {
-        sfxAudioSource.clip = powerUpClip;
-        sfxAudioSource.volume = sfxVolume;
         sfxAudioSource.PlayOneShot(powerUpClip);
+    }
+
+    public void PlayFreezeSFX()
+    {
+        sfxAudioSource.PlayOneShot(freezeClip);
+    }
+
+    public void PlayCollideSFX()
+    {
+        sfxAudioSource.PlayOneShot(collideClip);
     }
 
     public void PlayPressBtnSFX()
     {
-        sfxAudioSource.clip = pressBtnClip;
-        sfxAudioSource.volume = sfxVolume;
         sfxAudioSource.PlayOneShot(pressBtnClip);
     }
 
+    public void LoadMusicVolumeAndSFXVolume(Action onCompleted = null)
+    {
+        Debug.Log("Hi HERE");
+        string uid = AuthService.Instance.GetUser()?.UserId;
+        if (string.IsNullOrEmpty(uid))
+        {
+            onCompleted.Invoke();
+            return;
+        }
+
+        DaoService.Instance.GetMusicAndSFXVolumeSettings(uid, data =>
+        {
+            if (data != null)
+            {
+                float musicVol = data.ContainsKey("music-volume") ? data["music-volume"] : musicVolume;
+                float sfxVol = data.ContainsKey("sfx-volume") ? data["sfx-volume"] : sfxVolume;
+
+                MusicVolume(musicVol);
+                SFXVolume(sfxVol);
+            }
+
+            onCompleted.Invoke();
+        });
+    }
 
 
+    public void SaveMusicVolumeAndSFXVolume()
+    {
+        string uid = AuthService.Instance.GetUser()?.UserId;
+
+        if (string.IsNullOrEmpty(uid)) return;
+        DaoService.Instance.SaveMusicAndSFXVolumeSettings(uid, musicVolume, sfxVolume, success =>
+        {
+            Debug.Log("SUCCESS STATUS: " + success.ToString());
+        });
+    }
 }

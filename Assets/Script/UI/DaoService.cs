@@ -17,20 +17,7 @@ public class DaoService : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-
-            FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task =>
-            {
-                var dependencyStatus = task.Result;
-                if (dependencyStatus == DependencyStatus.Available)
-                {
-                    dbRef = FirebaseDatabase.DefaultInstance.RootReference;
-                    Debug.Log("Firebase đã sẵn sàng");
-                }
-                else
-                {
-                    Debug.LogError("Firebase chưa sẵn sàng: " + dependencyStatus);
-                }
-            });
+            dbRef = FirebaseDatabase.DefaultInstance.RootReference;
         }
         else
         {
@@ -234,9 +221,9 @@ public class DaoService : MonoBehaviour
     }
 
 
-
     public void GetMusicAndSFXVolumeSettings(string uid, Action<Dictionary<string, float>> onResult)
     {
+        if (dbRef == null) Debug.Log("DBREF NULL NE");
         dbRef.Child("user-info").Child(uid).GetValueAsync()
             .ContinueWithOnMainThread(task =>
             {
@@ -301,5 +288,48 @@ public class DaoService : MonoBehaviour
     }
 
 
+    public void GetLeaderBoardOfMap(int map_num, Action<List<Dictionary<string, object>>> onResult)
+    {
+        dbRef.Child("leaderboard").Child(map_num.ToString()).GetValueAsync()
+            .ContinueWithOnMainThread(task =>
+            {
+                if (task.IsFaulted || !task.IsCompletedSuccessfully)
+                {
+                    Debug.LogError("Failed to get leaderboard: " + task.Exception);
+                    onResult?.Invoke(null);
+                    return;
+                }
+
+                DataSnapshot snapshot = task.Result;
+                List<Dictionary<string, object>> leaderboard = new List<Dictionary<string, object>>();
+
+                if (snapshot.Exists)
+                {
+                    foreach (var child in snapshot.Children)
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+
+                        row["uid"] = child.Key;
+
+                        if (child.Value is Dictionary<string, object> data)
+                        {
+                            if (data.ContainsKey("name"))
+                                row["name"] = data["name"];
+
+                            if (data.ContainsKey("distance"))
+                                row["distance"] = data["distance"];
+                        }
+                        leaderboard.Add(row);
+                    }
+                    leaderboard.Sort((a, b) =>
+                                        {
+                                            int distanceA = a.ContainsKey("distance") ? Convert.ToInt32(a["distance"]) : 0;
+                                            int distanceB = b.ContainsKey("distance") ? Convert.ToInt32(b["distance"]) : 0;
+                                            return distanceB.CompareTo(distanceA);
+                                        });
+                }
+                onResult?.Invoke(leaderboard);
+            });
+    }
 
 }

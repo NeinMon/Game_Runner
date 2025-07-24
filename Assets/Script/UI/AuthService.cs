@@ -66,10 +66,10 @@ public class AuthService : MonoBehaviour
                         onSuccess?.Invoke(user);
                     });
                 }
+                onSuccess?.Invoke(user);
                 return;
             }
 
-            // Nếu lỗi là do chưa có tài khoản → đăng ký
             auth.CreateUserWithEmailAndPasswordAsync(email, password).ContinueWithOnMainThread(registerTask =>
             {
                 if (registerTask.IsCompletedSuccessfully)
@@ -98,7 +98,6 @@ public class AuthService : MonoBehaviour
         if (auth != null)
         {
             auth.SignOut();
-            Debug.Log("👋 Đã đăng xuất.");
         }
     }
 

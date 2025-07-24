@@ -17,6 +17,8 @@ public class MapManager : MonoBehaviour
 
     public Text scoreText;
 
+    private int totalScore;
+
     public GameObject scoreZone;
     public void Start()
     {
@@ -26,7 +28,6 @@ public class MapManager : MonoBehaviour
         map4Button.onClick.AddListener(RenderMap4);
         map5Button.onClick.AddListener(RenderMap5);
         map6Button.onClick.AddListener(RenderMap6);
-        scoreText.text = "0";
     }
     public void Open()
     {
@@ -45,13 +46,14 @@ public class MapManager : MonoBehaviour
         {
             scoreText.text = total_score.ToString();
             scoreZone.SetActive(true);
+            DaoService.Instance.GetCompletedProgressOfUserByUID(uid, maps_retrieved =>
+            {
+                completedMaps = maps_retrieved;
+                HandleSetInteractableMap();
+                gameObject.SetActive(true);
+            });
         });
-        DaoService.Instance.GetCompletedProgressOfUserByUID(uid, maps_retrieved =>
-        {
-            completedMaps = maps_retrieved;
-            HandleSetInteractableMap();
-            gameObject.SetActive(true);
-        });
+
     }
 
     public void Close()

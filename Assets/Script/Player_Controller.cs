@@ -13,15 +13,15 @@ public class Player_Controller : MonoBehaviour
     [Header("Movement Settings")]
     [SerializeField] private float forwardSpeed = 1f;
     [SerializeField] private float laneDistance = 1f;
-    private int targetLane = 1; // 0 = Left, 1 = Mid, 2 = Right
+    private int targetLane = 1;
     private CharacterController controller;
     [Header("Animation")]
-    [SerializeField] private Animator player_Animation; // Kéo thả Animator vào Inspector
+    [SerializeField] private Animator player_Animation;
     private Queue<int> laneChangeQueue = new Queue<int>();
     private bool isChangingLane = false;
     private bool isJumping = false;
-    [SerializeField] private float jumpForce = 2.2f; // Lực nhảy
-    [SerializeField] private float gravity = -5f; // Trọng lực, có thể chỉnh trong Inspector
+    [SerializeField] private float jumpForce = 2.2f;
+    [SerializeField] private float gravity = -5f;
     [SerializeField] private GameObject restartPanel;
     [SerializeField] private GameObject playPanel;
     [SerializeField] private GameObject wholeUIPanel;
@@ -33,8 +33,8 @@ public class Player_Controller : MonoBehaviour
     private int[] scoreRequire;
     private Vector3 startPos;
     private float originalSpeed;
-    [SerializeField] private float fastDuration = 3f; // Thời gian chạy nhanh (giây)
-    [SerializeField] private float slowDuration = 3f; // Thời gian chạy chậm (giây)
+    [SerializeField] private float fastDuration = 3f;
+    [SerializeField] private float slowDuration = 3f;
     [SerializeField] private float fastMultiplier = 2f;
     [SerializeField] private float slowMultiplier = 0.5f;
     private Text scoreText;
@@ -44,23 +44,23 @@ public class Player_Controller : MonoBehaviour
     [SerializeField] private float speedIncreaseRate = 0.05f;
     private float baseSpeed;
     private float speedMultiplier = 1f;
-    private Vector3 currentLanePosition; // Vị trí hiện tại để làm mượt chuyển làn
-    private float currentLaneOffset = 0f; // Độ lệch X hiện tại để làm mượt chuyển làn
+    private Vector3 currentLanePosition;
+    private float currentLaneOffset = 0f;
     private float laneOffsetVelocity = 0f;
-    [SerializeField] private float laneSmoothTime = 0.15f; // Thời gian làm mượt chuyển làn
+    [SerializeField] private float laneSmoothTime = 0.15f;
     private Vector3 laneVelocity = Vector3.zero;
-    private Vector3 forwardMove = Vector3.zero; // Vector di chuyển thẳng
-    private Vector3 laneMove = Vector3.zero;    // Vector di chuyển chuyển làn
-    [SerializeField] private float invisibleDuration = 4f; // Thời gian tàng hình và hiệu ứng (giây)
+    private Vector3 forwardMove = Vector3.zero;
+    private Vector3 laneMove = Vector3.zero;
+    [SerializeField] private float invisibleDuration = 4f;
     private bool isInvisible = false;
     private Renderer[] renderers;
     private Collider playerCollider;
-    [SerializeField] private ParticleSystem invisibleEffect; // Hiệu ứng khi tàng hình
-    [SerializeField] private ParticleSystem thunderEffect; // Hiệu ứng khi ăn Thunder
-    [SerializeField] private ParticleSystem timeEffect;    // Hiệu ứng khi ăn Time
-    [SerializeField] private ParticleSystem freezeEffect; // Hiệu ứng băng
+    [SerializeField] private ParticleSystem invisibleEffect;
+    [SerializeField] private ParticleSystem thunderEffect;
+    [SerializeField] private ParticleSystem timeEffect;
+    [SerializeField] private ParticleSystem freezeEffect;
 
-    private bool isFreezing = false; // Cờ kiểm soát hiệu ứng freeze
+    private bool isFreezing = false;
 
 
     private bool completed;
@@ -80,14 +80,14 @@ public class Player_Controller : MonoBehaviour
         forwardSpeed = minForwardSpeed;
         originalSpeed = minForwardSpeed;
         if (restartPanel != null)
-            restartPanel.SetActive(false); // Ẩn panel khi bắt đầu game
+            restartPanel.SetActive(false);
         if (playPanel != null)
-            playPanel.SetActive(true); // Hiện panel PLAY khi vào game
+            playPanel.SetActive(true);
         isGameStarted = false;
-        // Đảm bảo animation idle được kích hoạt khi bắt đầu game
+
         if (player_Animation != null)
         {
-            player_Animation.SetFloat("is_running", 0.0f); // Set trạng thái idle
+            player_Animation.SetFloat("is_running", 0.0f);
         }
         if (scoreText == null)
         {
@@ -229,9 +229,9 @@ public class Player_Controller : MonoBehaviour
 
     private Vector3 CalculateTargetPosition()
     {
-        // Trả về vị trí lane trên trục X, không thay đổi Z
+
         Vector3 pos = transform.position;
-        pos.x = (targetLane - 1) * laneDistance; // 0=-1, 1=0, 2=1
+        pos.x = (targetLane - 1) * laneDistance;
         return pos;
     }
 
@@ -246,7 +246,7 @@ public class Player_Controller : MonoBehaviour
         if (!isJumping && Input.GetKeyDown(KeyCode.UpArrow))
         {
             isJumping = true;
-            if (player_Animation) player_Animation.SetTrigger("is_jump"); // Trigger animation running_jump
+            if (player_Animation) player_Animation.SetTrigger("is_jump");
             StartCoroutine(JumpCoroutine());
         }
     }
@@ -255,7 +255,7 @@ public class Player_Controller : MonoBehaviour
     {
         float startY = transform.position.y;
         float velocity = jumpForce;
-        // Sử dụng gravity từ biến thay vì gán cứng
+
         while (velocity > 0 || transform.position.y > startY)
         {
             float deltaY = velocity * Time.deltaTime;
@@ -263,7 +263,7 @@ public class Player_Controller : MonoBehaviour
             velocity += gravity * Time.deltaTime;
             yield return null;
         }
-        // Đảm bảo nhân vật không bị tụt dưới mặt đất
+
         Vector3 pos = transform.position;
         pos.y = startY;
         transform.position = pos;
@@ -272,11 +272,10 @@ public class Player_Controller : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (isInvisible) return; // Nếu tàng hình thì bỏ qua va chạm
+        if (isInvisible) return;
         if (hit.gameObject.CompareTag("Car") || hit.gameObject.CompareTag("HighObstacle"))
         {
             Vector3 normal = hit.normal.normalized;
-            // Chỉ xử lý nếu va chạm phía trước hoặc hai bên xe, không phải từ trên xuống và không phải phía sau
             if ((normal.z < -0.5f || Mathf.Abs(normal.x) > 0.5f) && Mathf.Abs(normal.y) < 0.7f && normal.z < 0.5f)
             {
                 if (restartPanel != null)
@@ -285,12 +284,12 @@ public class Player_Controller : MonoBehaviour
                     restartPanel.SetActive(true);
                 }
                 if (player_Animation != null)
-                    player_Animation.SetFloat("is_running", 0.0f); // Chuyển về idle
-                isGameStarted = false; // Dừng toàn bộ gameplay
-                Debug.Log("CHUẨN BỊ LƯU DATA");
+                    player_Animation.SetFloat("is_running", 0.0f);
+                isGameStarted = false;
+                SoundManager.Instance.PlayCollideSFX();
                 HandleSaveProgressAndScore();
             }
-            // Nếu va chạm phía sau xe hoặc từ trên xuống, không làm gì cả
+
         }
     }
 
@@ -333,6 +332,7 @@ public class Player_Controller : MonoBehaviour
                     freezeEffect.Play();
                     StartCoroutine(StopFreezeEffectAfterDuration(2f));
                 }
+                SoundManager.Instance.PlayFreezeSFX();
                 StartCoroutine(FreezeAndRestartCoroutine());
             }
         }
@@ -366,7 +366,6 @@ public class Player_Controller : MonoBehaviour
 
     private System.Collections.IEnumerator InvisibleCoroutine()
     {
-        Debug.Log("[InvisibleCoroutine] Bắt đầu tàng hình");
         isInvisible = true;
         if (invisibleEffect != null)
         {
@@ -378,7 +377,6 @@ public class Player_Controller : MonoBehaviour
         yield return new WaitForSeconds(invisibleDuration);
         isInvisible = false;
         if (invisibleEffect != null) invisibleEffect.Stop();
-        Debug.Log("[InvisibleCoroutine] Hết tàng hình");
         Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Car"), false);
         Physics.IgnoreLayerCollision(gameObject.layer, LayerMask.NameToLayer("Obstacle"), false);
     }
@@ -395,10 +393,11 @@ public class Player_Controller : MonoBehaviour
         isGameStarted = false;
         if (player_Animation != null)
             player_Animation.SetFloat("is_running", 0.0f);
-        yield return new WaitForSeconds(2f); // Đợi hiệu ứng băng 2 giây
+        yield return new WaitForSeconds(2f);
         if (restartPanel != null)
             restartPanel.SetActive(true);
-        isFreezing = false; // Reset cờ cho lần sau
+        isFreezing = false;
+        HandleSaveProgressAndScore();
     }
 
 
@@ -410,7 +409,7 @@ public class Player_Controller : MonoBehaviour
         wholeUIPanel.SetActive(true);
         if (player_Animation != null)
         {
-            player_Animation.SetFloat("is_running", 1.0f); // Set trạng thái chạy khi bắt đầu game
+            player_Animation.SetFloat("is_running", 1.0f);
         }
     }
 
@@ -430,14 +429,14 @@ public class Player_Controller : MonoBehaviour
     public void PauseGame()
     {
         if (!isGameStarted) return;
-        Time.timeScale = 0f; // Dừng thời gian
+        Time.timeScale = 0f;
         CloseAllPanels();
         pausePanel.SetActive(true);
     }
 
     public void ResumeGame()
     {
-        Time.timeScale = 1f; // Tiếp tục thời gian
+        Time.timeScale = 1f;
         CloseAllPanels();
         wholeUIPanel.SetActive(true);
     }
