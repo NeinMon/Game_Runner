@@ -242,6 +242,6 @@ public class Mapgameflow : MonoBehaviour
     private bool ShouldSpawnHighObstacles()
     {
         // Chỉ màn 6 có high obstacles
-        return currentLevel == 6;
+        return currentLevel == 6 || currentLevel == 3;
     }
 }
