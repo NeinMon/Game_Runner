@@ -72,6 +72,8 @@ public class Player_Controller : MonoBehaviour
 
     void Start()
     {
+        // Đảm bảo game luôn chạy ở tốc độ bình thường khi scene được load/reload
+        Time.timeScale = 1f;
         // scoreRequire = new int[] { 100, 150, 200, 100, 150, 200 };
         scoreRequire = new int[] { 10, 15, 20, 10, 15, 20 };
         startPos = transform.position;
@@ -413,6 +415,7 @@ public class Player_Controller : MonoBehaviour
 
     public void PlayGame()
     {
+        Time.timeScale = 1f;
         isGameStarted = true;
         CloseAllPanels();
         wholeUIPanel.SetActive(true);
@@ -424,6 +427,7 @@ public class Player_Controller : MonoBehaviour
 
     public void RestartGame()
     {
+        Time.timeScale = 1f;
         CloseAllPanels();
         playPanel.SetActive(true);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -431,6 +435,7 @@ public class Player_Controller : MonoBehaviour
 
     public void ReturnToMainMenu()
     {
+        Time.timeScale = 1f;
         CloseAllPanels();
         SceneManager.LoadScene("MainMenu");
     }
